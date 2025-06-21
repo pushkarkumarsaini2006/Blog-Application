@@ -4,6 +4,7 @@ import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import CharAvatar from "../Cards/CharAvatar";
 import { UserContext } from "../../context/userContext";
+import { getFullImageUrl } from "../../utils/helper";
 
 const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
   const { user, setUser } = useContext(UserContext);
