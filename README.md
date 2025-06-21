@@ -1,1 +1,1 @@
-# Blog-Application
+# Blog-Platform
