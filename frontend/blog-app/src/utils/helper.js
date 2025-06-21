@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 export const getInitials = (title) => {
   if (!title) return "";
 
@@ -47,4 +49,24 @@ export function getFullImageUrl(path) {
     return path;
   }
   return `${import.meta.env.VITE_BACKEND_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
+export function useGreeting() {
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning!";
+    if (hour < 18) return "Good Afternoon!";
+    return "Good Evening!";
+  };
+
+  const [greeting, setGreeting] = useState(getGreeting());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreeting(getGreeting());
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+
+  return greeting;
 }

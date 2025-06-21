@@ -15,10 +15,12 @@ import DashboardSummaryCard from "../../components/Cards/DashboardSummaryCard";
 import TagInsights from "../../components/Cards/TagInsights";
 import TopPostCard from "../../components/Cards/TopPostCard";
 import RecentCommentsList from "../../components/Cards/RecentCommentsList";
+import { useGreeting } from "../../utils/helper";
 
 const Dashboard = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
+  const greeting = useGreeting();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [maxViews, setMaxViews] = useState(0);
@@ -53,7 +55,7 @@ const Dashboard = () => {
             <div>
               <div className="col-span-3">
                 <h2 className="text-xl md:text-2xl font-medium">
-                  Good Morning! {user.name}
+                  {greeting} {user.name}
                 </h2>
                 <p className="text-xs md:text-[13px] font-medium text-gray-400 mt-1.5">
                   {moment().format("dddd MMM YYYY")}
