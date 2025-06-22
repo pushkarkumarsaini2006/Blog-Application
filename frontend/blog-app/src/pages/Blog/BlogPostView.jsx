@@ -16,7 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import BlogLayout from '../../components/layouts/BlogLayout/BlogLayout';
 import MarkdownContent from './components/MarkdownContent';
 import SharePost from './components/SharePost';
-import { sanitizeMarkdown } from '../../utils/helper';
+import { sanitizeMarkdown, getFullImageUrl } from '../../utils/helper';
 import CommentInfoCard from './components/CommentInfoCard';
 import Drawer from '../../components/Drawer';
 import LikeCommentButton from './components/LikeCommentButton';
