@@ -1,4 +1,5 @@
 import React from "react";
+import { getFullImageUrl } from '../../../utils/helper';
 
 const FeaturedBlogPost = ({
   title,

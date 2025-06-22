@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosInstance";
 import { API_PATHS } from "../../../utils/apiPaths";
 import { useNavigate } from "react-router-dom";
+import { getFullImageUrl } from '../../../utils/helper';
 
 const TrendingPostsSection = () => {
     const navigate = useNavigate();
