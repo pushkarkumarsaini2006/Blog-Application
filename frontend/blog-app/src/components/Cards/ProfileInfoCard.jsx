@@ -7,6 +7,9 @@ const ProfileInfoCard = () => {
   const { user, clearUser } = useContext(UserContext);
   const navigate = useNavigate();
 
+  // Debug: Log user object to check profileImageUrl
+  console.log('ProfileInfoCard user:', user);
+
   const handelLogout = () => {
     localStorage.clear();
     clearUser();
