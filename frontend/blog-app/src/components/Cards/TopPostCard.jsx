@@ -1,5 +1,6 @@
 import React from "react";
 import { LuHeart } from "react-icons/lu";
+import { getFullImageUrl } from '../../utils/helper';
 
 const TopPostCard = ({ title, coverImageUrl, views, likes, maxViews }) => {
     const viewPercentage = ((views / maxViews) * 100).toFixed(0);

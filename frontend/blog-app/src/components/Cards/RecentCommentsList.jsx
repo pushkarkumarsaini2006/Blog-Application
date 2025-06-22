@@ -1,6 +1,7 @@
 import React from 'react'
 import moment from "moment";
 import { LuDot } from "react-icons/lu";
+import { getFullImageUrl } from '../../utils/helper';
 
 const RecentCommentsList = ({comments}) => {
   return (
