@@ -51,14 +51,17 @@ const Login = ({setCurrentPage}) => {
         localStorage.setItem("token", token);
         updateUser(response.data);
 
-        //Redirect based on role
-        if (role === "admin") {
-          setOpenAuthForm(false)
-          navigate("/admin/dashboard");
-        } else {
-          setOpenAuthForm(false)
-          navigate("/");
-        }
+        // Small delay to ensure context is updated before navigation
+        setTimeout(() => {
+          //Redirect based on role
+          if (role === "admin") {
+            setOpenAuthForm(false)
+            navigate("/admin/dashboard");
+          } else {
+            setOpenAuthForm(false)
+            navigate("/");
+          }
+        }, 100);
       }
     } catch (error) {
       console.error("Login error:", error);
