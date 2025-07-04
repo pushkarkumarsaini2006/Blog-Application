@@ -10,38 +10,45 @@ const UserProvider = ({ children }) => {
   const [openAuthForm, setOpenAuthForm] = useState(false);
 
   useEffect(() => {
-    if (user) return;
+    const initializeUser = async () => {
+      const accessToken = localStorage.getItem("token");
+      
+      if (!accessToken) {
+        setLoading(false);
+        return;
+      }
 
-    const accessToken = localStorage.getItem("token");
-    if (!accessToken) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchUser = async () => {
       try {
         const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
+        console.log("User profile fetched:", response.data); // Debug log
         setUser(response.data);
       } catch (error) {
-        console.error("User not authenticated", error);
-        clearUser();
+        console.error("User authentication failed:", error);
+        // Clear invalid token
+        localStorage.removeItem("token");
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    initializeUser();
   }, []);
 
   const updateUser = (userData) => {
+    console.log("Updating user context with:", userData); // Debug log
     setUser(userData);
-    localStorage.setItem("token", userData.token); // Save token
+    if (userData.token) {
+      localStorage.setItem("token", userData.token);
+    }
     setLoading(false);
   };
 
   const clearUser = () => {
+    console.log("Clearing user context"); // Debug log
     setUser(null);
     localStorage.removeItem("token");
+    setLoading(false);
   };
 
   return (

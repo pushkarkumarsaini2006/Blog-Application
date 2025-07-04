@@ -76,6 +76,7 @@ export function getFullImageUrl(path) {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   const fullPath = `${baseUrl}${cleanPath}`;
   
+  console.log('Image URL constructed:', { path, baseUrl, fullPath }); // Debug log
   return fullPath;
 }
 
