@@ -1,0 +1,8 @@
+frontend/blog-app/render.yaml
+frontend/blog-app/netlify.toml
+frontend/blog-app/public/_redirects
+frontend/blog-app/build-render.sh
+backend/render.yaml
+backend/prepare-deploy.sh
+backend/Procfile
+backend/start.sh

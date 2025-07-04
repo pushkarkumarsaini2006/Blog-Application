@@ -17,7 +17,7 @@
   
   # IMPORTANT: Set VITE_BACKEND_URL in Netlify dashboard after backend deployment
   # Go to: Site settings > Environment variables > Add variable
-  VITE_BACKEND_URL = "https://blog-application-hgra.onrender.com"
+  VITE_BACKEND_URL = "YOUR_BACKEND_URL_HERE"
 
 # Redirect rules for Single Page Application (SPA)
 [[redirects]]

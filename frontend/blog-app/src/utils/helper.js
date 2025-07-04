@@ -54,14 +54,10 @@ export function getFullImageUrl(path) {
   // Handle relative paths - construct full URL
   let baseUrl = import.meta.env.VITE_BACKEND_URL || '';
   
-  // For production on Render, use the backend URL
+  // For production, use the backend URL from env or fallback to localhost
   if (!baseUrl && typeof window !== 'undefined') {
-    // Detect if we're on Render production
     const hostname = window.location.hostname;
-    if (hostname.includes('onrender.com')) {
-      // Use the backend Render URL with HTTPS
-      baseUrl = 'https://blog-application-hgra.onrender.com';
-    } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
       // Development fallback
       baseUrl = 'http://localhost:5000';
     } else {

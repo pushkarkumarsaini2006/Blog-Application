@@ -1,97 +1,125 @@
 # 📝 Blog Application
 
-A full-stack, AI-powered blogging platform built using **Node.js**, **Express**, **MongoDB**, and **React (Vite)**. Designed for modern creators, this platform offers intuitive content management, rich markdown support, and intelligent features like blog post generation with AI.
+A full-stack, AI-powered blogging platform built with **Node.js**, **Express**, **MongoDB**, and **React (Vite)**. Designed for modern creators to efficiently write, manage, and share blog posts with a modern, responsive UI and AI-powered features.
 
-🚀 **Live Demo**: [https://blog-application-1-1v3z.onrender.com](https://blog-application-1-1v3z.onrender.com)
-
-📡 **API Backend**: [https://blog-application-hgra.onrender.com](https://blog-application-hgra.onrender.com)
+🚀 **Live Demo**:
+- Backend: [YOUR_BACKEND_URL_HERE]
+- Frontend: [YOUR_FRONTEND_URL_HERE]
 
 ---
 
 ## 🔑 Key Features
-
-### 🔒 Authentication
-- Secure user registration and login with **JWT** and **bcrypt**.
-- User roles for managing admin-level access.
-
-### ✍️ Blog Management
-- Full **CRUD** operations for blog posts.
-- Optional **cover images** and **slug-based URLs**.
-- **Draft & Publish Toggle** for flexible publishing.
-
-### 📓 Markdown Editor
-- Create blog posts using **Markdown**.
-- Live preview with **syntax highlighting**.
-
-### 🤖 AI Integration
-- Generate AI-powered, markdown-formatted blog posts from just a title.
-
-### 🏷️ Tags & Filtering
-- Tag-based categorization (e.g., React, Node).
-- Filter and explore content easily.
-
-### 🔍 Search & Discovery
-- Real-time search by **title** or **content**.
-
-### 📊 Admin Dashboard
-- Manage users, posts, and analytics with ease.
-- Visual insights with charts and summaries.
-
-### 💬 Community Features
-- Comment system for readers to leave feedback.
-- **Like/Clap button** to engage with content.
-
-### 📈 Post Analytics
-- **View counter** to track post popularity.
-
-### 📱 Responsive Design
-- Fully optimized for **mobile** and **desktop** experiences.
+- User dashboard with blog post and comment management
+- Create, update, and manage blog posts with markdown support
+- AI-powered blog post and comment generation
+- Tag-based categorization and real-time search
+- Admin dashboard with analytics and user management
+- Community features: comments, likes/claps
+- Mobile responsive UI
 
 ---
 
 ## 🗂️ Project Structure
 
-```bash
+```
 backend/
+  package.json
   server.js
   config/
+    db.js
   controllers/
+    aiController.js
+    authController.js
+    blogPostController.js
+    commentController.js
+    dashboardController.js
   middlewares/
+    authMiddleware.js
+    uploadMiddleware.js
   models/
+    BlogPost.js
+    Comment.js
+    User.js
   routes/
+    aiRoutes.js
+    authRoutes.js
+    blogPostRoutes.js
+    commentRoutes.js
+    dashboardRoutes.js
   uploads/
+    ...
   utils/
-
+    prompts.js
 frontend/
   blog-app/
-    src/
-      components/
-      pages/
-      context/
-      routes/
-      utils/
-    public/
-    index.html
     package.json
+    vite.config.js
+    index.html
+    public/
+      favicon.svg
+      vite.svg
+      404.html
+    src/
+      App.jsx
+      index.css
+      main.jsx
+      assets/
+        auth-img.jpg
+        default-profile.svg
+        logo.svg
+        react.svg
+      components/
+        DeleteAlertContent.jsx
+        Drawer.jsx
+        Modal.jsx
+        SafeImage.jsx
+        Tabs.jsx
+        Auth/
+          Login.jsx
+          SignUp.jsx
+        Cards/
+          BlogPostIdeaCard.jsx
+          ...
+        Charts/
+        Inputs/
+        layouts/
+        Loader/
+      context/
+        userContext.jsx
+      pages/
+        Admin/
+        Blog/
+      routes/
+        PrivateRoute.jsx
+      styles/
+        performance.css
+      utils/
+        apiPaths.js
+        axiosInstance.js
+        config.js
+        data.js
+        helper.js
+        imageLoader.js
+        uploadImage.js
 ```
 
 ---
 
 ## ⚙️ Getting Started
 
-### ✅ Prerequisites
+### Prerequisites
 - Node.js (v18+ recommended)
 - npm or yarn
 - MongoDB (local or cloud)
 
 ---
 
-### 🔧 Backend Setup
+### Backend Setup
 
-```bash
+```
 cd backend
 npm install
-# Create a .env file and add the following:
+# Create a .env file and add:
 # MONGODB_URI=your_mongodb_uri
 # JWT_SECRET=your_jwt_secret
 npm start
@@ -99,13 +127,14 @@ npm start
 
 ---
 
-### 💻 Frontend Setup
+### Frontend Setup
 
-```bash
+```
 cd frontend/blog-app
 npm install
 # Create a .env file and add:
-# VITE_BACKEND_URL=https://your-backend-url
+# VITE_BACKEND_URL=http://localhost:5000
+# For deployed usage, set VITE_BACKEND_URL to your backend URL
 npm run dev
 ```
 
@@ -113,38 +142,31 @@ npm run dev
 
 ## 🚀 Deployment on Render
 
-### 🔁 Backend
-- Deploy as a **Web Service**.
-- Add environment variables in Render settings.
-- Build Command:
-```bash
-npm install
-```
-- Start Command:
-```bash
-node server.js
-```
+### Backend
+- Deploy as a **Web Service**
+- Build Command: `npm install`
+- Start Command: `node server.js`
+- Add environment variables in Render settings
 
-### 🌐 Frontend
-```bash
-npm run build
-# Deploy the dist folder as a Static Site on Render
-# Set VITE_BACKEND_URL in environment variables to your backend URL
-```
+### Frontend
+- Build Command: `npm run build`
+- Deploy the `dist` folder as a Static Site on Render
+- Set `VITE_BACKEND_URL` in environment variables to your backend URL
 
 ---
 
 ## 🔐 Environment Variables
 
 ### Backend `.env`
-```bash
+```
 MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 ```
 
 ### Frontend `.env`
-```bash
-VITE_BACKEND_URL=https://your-backend-url
+```
+VITE_BACKEND_URL=http://localhost:5000
+# For deployed usage, set VITE_BACKEND_URL to your backend URL
 ```
 
 ---
@@ -157,4 +179,4 @@ This project is licensed under the **MIT License**.
 
 ## 👨‍💻 Developer
 
-**Pushkar Kumar Saini** 
+**Pushkar Kumar Saini**

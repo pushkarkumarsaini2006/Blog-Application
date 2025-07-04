@@ -11,7 +11,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: VITE_BACKEND_URL
-        value: https://blog-application-hgra.onrender.com
+        value: YOUR_BACKEND_URL_HERE
     # SPA routing configuration
     routes:
       - type: rewrite
