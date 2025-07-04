@@ -1,8 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-d        />
-        
-        <DebugUserInfo />
-      </div>
-    </UserProvider>;;
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import BlogLandingPage from "./pages/Blog/BlogLandingPage";
