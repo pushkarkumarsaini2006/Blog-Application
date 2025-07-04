@@ -4,7 +4,7 @@ A full-stack, AI-powered blogging platform built with **Node.js**, **Express**, 
 
 🚀 **Live Demo**:
 - Backend: https://blog-application-54yd.onrender.com
-- Frontend: [YOUR_FRONTEND_URL_HERE]
+- Frontend: https://blog-application-1-i0me.onrender.com
 
 ---
 
