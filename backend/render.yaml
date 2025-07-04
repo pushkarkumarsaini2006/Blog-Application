@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: blog-backend
+    env: node
+    buildCommand: rm -f package-lock.json && npm cache clean --force && npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: blog-db
+          property: connectionString
+    healthCheckPath: /health
+    disk:
+      name: blog-backend-disk
+      mountPath: /opt/render/project/src/backend/uploads
+      sizeGB: 1 type: web
+    name: blog-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: blog-db
+          property: connectionString
+    healthCheckPath: /api/posts

@@ -1,0 +1,6 @@
+# Redirect all routes to index.html for SPA routing
+/*    /index.html   200
+
+# API proxy redirects (if needed)
+/api/*  https://blog-application-hgra.onrender.com/api/:splat  200
+/uploads/*  https://blog-application-hgra.onrender.com/uploads/:splat  200
