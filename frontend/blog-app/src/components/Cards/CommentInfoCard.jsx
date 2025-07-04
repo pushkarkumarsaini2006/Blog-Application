@@ -36,8 +36,6 @@ const CommentInfoCard = ({
   // Add Reply
   const handleAddReply = async () => {
     try {
-      console.log("post", post);
-
       await axiosInstance.post(
         API_PATHS.COMMENTS.ADD(post._id),
         {

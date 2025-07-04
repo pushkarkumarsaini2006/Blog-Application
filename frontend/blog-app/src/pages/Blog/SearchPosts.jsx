@@ -32,7 +32,6 @@ const SearchPosts = () => {
   };
 
   useEffect(() => {
-    console.log("query", query);
     handleSearch();
 
     return () => {};

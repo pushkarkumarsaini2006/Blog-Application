@@ -84,7 +84,6 @@ const CommentInfoCard = ({
                       onClick={() => {
                         
                         if (!user) {
-                          console.log("USER", user);
                           setOpenAuthForm(true);
                           return; 
                         }

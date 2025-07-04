@@ -10,12 +10,6 @@ const uploadImage = async (imageFile) => {
   // Append image file to form data
   formData.append('image', imageFile); 
 
-  console.log('Uploading image:', { 
-    name: imageFile.name, 
-    size: imageFile.size, 
-    type: imageFile.type 
-  }); // Debug log
-
   try {
     const response = await axiosInstance.post(API_PATHS.IMAGE.UPLOAD_IMAGE, formData, {
       headers: {
@@ -24,7 +18,6 @@ const uploadImage = async (imageFile) => {
       timeout: 30000, // 30 second timeout for image upload
     });
     
-    console.log('Image upload response:', response.data); // Debug log
     return response.data; // Return response data
   } catch (error) {
     console.error('Error uploading the image:', error); 

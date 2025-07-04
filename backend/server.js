@@ -93,11 +93,8 @@ app.get('/uploads/:filename', (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, 'uploads', filename);
   
-  console.log('Image request:', { filename, filePath, exists: require('fs').existsSync(filePath) }); // Debug log
-  
   // Check if file exists
   if (!require('fs').existsSync(filePath)) {
-    console.log('Image not found:', filePath); // Debug log
     return res.status(404).json({ error: 'Image not found' });
   }
   
@@ -114,7 +111,6 @@ app.get('/uploads/:filename', (req, res) => {
     'Access-Control-Max-Age': '86400'
   });
   
-  console.log('Serving image:', filename); // Debug log
   res.sendFile(filePath);
 });
 
