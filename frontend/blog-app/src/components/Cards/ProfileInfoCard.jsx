@@ -1,8 +1,7 @@
 import React, { useContext } from "react";
 import { UserContext } from "../../context/userContext";
 import { useNavigate } from "react-router-dom";
-import { getFullImageUrl } from '../../utils/helper';
-import SafeImage from '../SafeImage';
+import ProfileImage from '../ProfileImage';
 import CharAvatar from './CharAvatar';
 import { LuUser } from 'react-icons/lu';
 
@@ -21,12 +20,11 @@ const ProfileInfoCard = () => {
   return (
     <div className="flex items-center">
       {user?.profileImageUrl ? (
-        <SafeImage
-          src={getFullImageUrl(user.profileImageUrl)}
+        <ProfileImage
+          src={user.profileImageUrl}
           alt={`Profile picture of ${user.name || 'User'}`}
-          className="w-11 h-11 bg-gray-300 rounded-full mr-3 object-cover"
+          size="w-11 h-11 mr-3"
           fallbackIcon={LuUser}
-          fallbackClassName="text-gray-500"
         />
       ) : (
         <CharAvatar

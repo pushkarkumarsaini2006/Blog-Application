@@ -25,7 +25,6 @@ const UserProvider = ({ children }) => {
 
       try {
         const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
-        console.log("User profile fetched from token:", response.data); // Debug log
         setUser(response.data);
       } catch (error) {
         console.error("User authentication failed:", error);
@@ -42,7 +41,6 @@ const UserProvider = ({ children }) => {
   }, [initialized]);
 
   const updateUser = (userData) => {
-    console.log("Updating user context with:", userData); // Debug log
     setUser(userData);
     if (userData.token) {
       localStorage.setItem("token", userData.token);
@@ -52,7 +50,6 @@ const UserProvider = ({ children }) => {
   };
 
   const clearUser = () => {
-    console.log("Clearing user context"); // Debug log
     setUser(null);
     localStorage.removeItem("token");
     setLoading(false);

@@ -12,7 +12,6 @@ import BlogPosts from "./pages/Admin/BlogPosts";
 import BlogPostEditor from "./pages/Admin/BlogPostEditor";
 import Comments from "./pages/Admin/Comments";
 import UserProvider from "./context/userContext";
-import DebugUserInfo from "./components/DebugUserInfo";
 
 const App = () => {
   return (
@@ -69,8 +68,6 @@ const App = () => {
             animation: "none", // Disable container animations
           }}
         />
-        
-        <DebugUserInfo />
       </div>
     </UserProvider>
   );

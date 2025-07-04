@@ -5,8 +5,6 @@ import { UserContext } from "../context/userContext";
 const PrivateRoute = ({allowedRoles}) => {
     const { user, loading } = useContext(UserContext);
 
-  console.log('PrivateRoute - User:', user, 'Loading:', loading, 'AllowedRoles:', allowedRoles); // Debug log
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -19,12 +17,10 @@ const PrivateRoute = ({allowedRoles}) => {
   }
 
   if (!user) {
-    console.log('PrivateRoute - No user, redirecting to home');
     return <Navigate to="/" replace />;
   }
 
   if (!allowedRoles.includes(user.role)) {
-    console.log('PrivateRoute - User role not allowed:', user.role);
     return <Navigate to="/" replace />;
   }
 

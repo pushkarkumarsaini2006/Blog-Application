@@ -20,14 +20,11 @@ const SafeImage = ({
 
   // Enhanced error handling with retry logic
   const handleError = async () => {
-    console.log(`Image failed to load: ${src}, retry count: ${retryCount}`); // Debug log
-    
     if (retryCount < IMAGE_CONFIG.MAX_RETRIES) {
       // Try with image loader for better CORS handling
       try {
         const loadedUrl = await ImageLoader.loadImageWithFallback(src);
         if (loadedUrl && imgRef.current) {
-          console.log(`Retry ${retryCount + 1}: Using loaded URL:`, loadedUrl); // Debug log
           setRetryCount(prev => prev + 1);
           setCurrentSrc(loadedUrl);
           imgRef.current.src = loadedUrl;
@@ -42,7 +39,6 @@ const SafeImage = ({
         setRetryCount(prev => prev + 1);
         if (imgRef.current) {
           const retryUrl = `${src}?t=${Date.now()}&retry=${retryCount}`; // Cache busting with retry count
-          console.log(`Retry ${retryCount + 1}: Using cache-busted URL:`, retryUrl); // Debug log
           setCurrentSrc(retryUrl);
           imgRef.current.src = retryUrl;
         }

@@ -4,8 +4,7 @@ import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import CharAvatar from "../Cards/CharAvatar";
 import { UserContext } from "../../context/userContext";
-import { getFullImageUrl } from "../../utils/helper";
-import SafeImage from "../SafeImage";
+import ProfileImage from "../ProfileImage";
 
 const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
   const { user, setUser } = useContext(UserContext);
@@ -33,18 +32,10 @@ const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
       {user && (
         <div className="flex flex-col items-center justify-center gap-1 mt-3 mb-7">
           {user?.profileImageUrl ? (
-            <SafeImage
-              src={getFullImageUrl(user?.profileImageUrl || "")}
+            <ProfileImage
+              src={user?.profileImageUrl || ""}
               alt={`Profile picture of ${user?.name || 'User'}`}
-              className="w-20 h-20 bg-slate-400 rounded-full object-cover"
-              fallbackIcon={() => (
-                <CharAvatar
-                  fullName={user?.name || ""}
-                  width="w-20"
-                  height="h-20"
-                  style="text-xl"
-                />
-              )}
+              size="w-20 h-20"
             />
           ) : (
             <CharAvatar
