@@ -1,6 +1,0 @@
-# Redirect all routes to index.html for SPA routing
-/*    /index.html   200
-
-# API proxy redirects (if needed)
-# /api/*  YOUR_BACKEND_URL_HERE/api/:splat  200
-# /uploads/*  YOUR_BACKEND_URL_HERE/uploads/:splat  200
