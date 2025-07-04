@@ -3,7 +3,7 @@
 A full-stack, AI-powered blogging platform built with **Node.js**, **Express**, **MongoDB**, and **React (Vite)**. Designed for modern creators to efficiently write, manage, and share blog posts with a modern, responsive UI and AI-powered features.
 
 🚀 **Live Demo**:
-- Backend: [YOUR_BACKEND_URL_HERE]
+- Backend: https://blog-application-54yd.onrender.com
 - Frontend: [YOUR_FRONTEND_URL_HERE]
 
 ---
@@ -161,12 +161,14 @@ npm run dev
 ```
 MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
+# For deployed usage:
+BACKEND_URL=https://blog-application-54yd.onrender.com
 ```
 
 ### Frontend `.env`
 ```
-VITE_BACKEND_URL=http://localhost:5000
-# For deployed usage, set VITE_BACKEND_URL to your backend URL
+VITE_BACKEND_URL=https://blog-application-54yd.onrender.com
+# For local development, use VITE_BACKEND_URL=http://localhost:5000
 ```
 
 ---
