@@ -29,7 +29,8 @@ app.use(
   cors({
     origin: process.env.NODE_ENV === 'production' 
       ? [
-          process.env.FRONTEND_URL || "https://blog-application-1-1v3z.onrender.com",
+          process.env.FRONTEND_URL || "https://blog-application-1-i0me.onrender.com",
+          "https://blog-application-1-i0me.onrender.com",
           "https://blog-application-1-1v3z.onrender.com",
           /\.netlify\.app$/,
           /\.onrender\.com$/,
@@ -38,12 +39,52 @@ app.use(
           "http://localhost:5173"
         ]
       : "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+      "Content-Type", 
+      "Authorization", 
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+      "Access-Control-Request-Method",
+      "Access-Control-Request-Headers"
+    ],
+    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
     credentials: true,
+    preflightContinue: false,
     optionsSuccessStatus: 200
   })
 );
+
+// Additional CORS headers for all responses
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = process.env.NODE_ENV === 'production' 
+    ? [
+        process.env.FRONTEND_URL || "https://blog-application-1-i0me.onrender.com",
+        "https://blog-application-1-i0me.onrender.com",
+        "https://blog-application-1-1v3z.onrender.com"
+      ]
+    : "*";
+    
+  if (process.env.NODE_ENV === 'production') {
+    if (allowedOrigins.includes(origin) || /\.onrender\.com$/.test(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 // Connect Database
 connectDB();
