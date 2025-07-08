@@ -1,0 +1,7 @@
+# Global .gitignore for Blog-Application
+# Ignore all environment/secret files
+backend/.env
+backend/.env.*
+frontend/blog-app/.env
+frontend/blog-app/.env.*
+# Add more secret/config files below as needed
