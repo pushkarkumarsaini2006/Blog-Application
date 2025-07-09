@@ -11,6 +11,8 @@ import {
 import FeaturedBlogPost from "./components/FeaturedBlogPost";
 import BlogPostSummaryCard from "./components/BlogPostSummaryCard";
 import TrendingPostsSection from "./components/TrendingPostsSection";
+import { handleError } from "../../utils/errorHandler";
+import useApiCall from "../../hooks/useApiCall";
 
 const BlogLandingPage = () => {
   const navigate = useNavigate();
@@ -20,18 +22,27 @@ const BlogLandingPage = () => {
   const [totalPages, setTotalPages] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch paginated posts
-  const getAllPosts = async (pageNumber = 1) => {
+  // Fetch paginated posts with improved error handling
+  const fetchPosts = async (pageNumber = 1) => {
+    const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
+      params: {
+        status: "published",
+        page: pageNumber,
+      },
+    });
+    return response.data;
+  };
+
+  const { execute: getAllPosts } = useApiCall(fetchPosts, {
+    customMessage: "Failed to load blog posts. The backend might be starting up...",
+    onRetry: () => getAllPosts(page)
+  });
+
+  // Load posts with error handling
+  const loadPosts = async (pageNumber = 1) => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
-        params: {
-          status: "published",
-          page: pageNumber,
-        },
-      });
-
-      const { posts, totalPages } = response.data;
+      const { posts, totalPages } = await getAllPosts(pageNumber);
 
       setBlogPostList((prevPosts) =>
         pageNumber === 1 ? posts : [...prevPosts, ...posts]
@@ -40,7 +51,8 @@ const BlogLandingPage = () => {
       setTotalPages(totalPages);
       setPage(pageNumber);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      // Error is already handled by useApiCall
+      console.error("Error loading posts:", error);
     } finally {
       setIsLoading(false);
     }
@@ -49,13 +61,13 @@ const BlogLandingPage = () => {
   // Load more posts
   const handleLoadMore = () => {
     if (page < totalPages) {
-      getAllPosts(page + 1);
+      loadPosts(page + 1);
     }
   };
 
   // Initial load
   useEffect(() => {
-    getAllPosts(1);
+    loadPosts(1);
   }, []);
 
   const handleClick = (post) => {

@@ -3,21 +3,30 @@ import axiosInstance from "../../../utils/axiosInstance";
 import { API_PATHS } from "../../../utils/apiPaths";
 import { useNavigate } from "react-router-dom";
 import { getFullImageUrl } from '../../../utils/helper';
+import useApiCall from "../../../hooks/useApiCall";
 
 const TrendingPostsSection = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [postList, setPostList] = useState([]);
 
-  // fetch trending blog posts
-  const getTrendingPosts = async () => {
-    try {
-      const response = await axiosInstance.get(
-        API_PATHS.POSTS.GET_TRENDING_POSTS
-      );
+  // fetch trending blog posts with error handling
+  const fetchTrendingPosts = async () => {
+    const response = await axiosInstance.get(API_PATHS.POSTS.GET_TRENDING_POSTS);
+    return response.data;
+  };
 
-      setPostList(response.data?.length > 0 ? response.data : []);
+  const { execute: getTrendingPosts } = useApiCall(fetchTrendingPosts, {
+    customMessage: "Failed to load trending posts. The backend might be starting up...",
+    silent: true // Don't show toast errors for trending posts
+  });
+
+  const loadTrendingPosts = async () => {
+    try {
+      const data = await getTrendingPosts();
+      setPostList(data?.length > 0 ? data : []);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error loading trending posts:", error);
+      // Silently fail for trending posts
     }
   };
 
@@ -27,7 +36,7 @@ const TrendingPostsSection = () => {
   };
 
   useEffect(() => {
-    getTrendingPosts();
+    loadTrendingPosts();
     return () => {};
   }, []);
   return <div>

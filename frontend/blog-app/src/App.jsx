@@ -12,6 +12,7 @@ import BlogPosts from "./pages/Admin/BlogPosts";
 import BlogPostEditor from "./pages/Admin/BlogPostEditor";
 import Comments from "./pages/Admin/Comments";
 import UserProvider from "./context/userContext";
+import BackendStatusIndicator from "./components/BackendStatusIndicator";
 
 const App = () => {
   return (
@@ -63,11 +64,19 @@ const App = () => {
                 color: '#ffffff',
               },
             },
+            loading: {
+              style: {
+                background: '#F59E0B',
+                color: '#ffffff',
+              },
+            },
           }}
           containerStyle={{
             animation: "none", // Disable container animations
           }}
         />
+        
+        <BackendStatusIndicator />
       </div>
     </UserProvider>
   );

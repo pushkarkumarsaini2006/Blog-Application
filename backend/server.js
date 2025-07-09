@@ -28,6 +28,8 @@ process.on('unhandledRejection', (err) => {
 const allowedOrigins = [
   "https://blog-application-1-i0me.onrender.com",
   "https://blog-application-1-1v3z.onrender.com",
+  "https://blog-application-54yd.onrender.com",
+  "https://blog-application-hgra.onrender.com",
   "http://localhost:3000",
   "http://localhost:5173"
 ];
@@ -66,13 +68,35 @@ app.use(
 // Connect Database
 connectDB();
 
+// Keep-alive mechanism for Render free tier
+const keepAlive = () => {
+  setInterval(() => {
+    console.log(`Keep-alive ping at ${new Date().toISOString()}`);
+  }, 14 * 60 * 1000); // Ping every 14 minutes
+};
+
+// Start keep-alive only in production
+if (process.env.NODE_ENV === 'production') {
+  keepAlive();
+}
+
 // Health check endpoint for Render
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     message: 'Blog Backend is running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime()
+  });
+});
+
+// Ping endpoint for wake-up calls
+app.get('/ping', (req, res) => {
+  res.status(200).json({ 
+    status: 'pong',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
 });
 

@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:render": "VITE_BACKEND_URL=https://blog-application-hgra.onrender.com vite build",
+    "build:render": "VITE_BACKEND_URL=https://blog-application-54yd.onrender.com vite build",
     "start": "vite preview --host 0.0.0.0 --port 3000"
   },
   "dependencies": {
