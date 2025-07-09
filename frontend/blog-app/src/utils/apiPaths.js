@@ -1,4 +1,4 @@
-export const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+export const BASE_URL = import.meta.env.VITE_BACKEND_URL || "https://blog-application-54yd.onrender.com";
 
 export const API_PATHS = {
   AUTH: {

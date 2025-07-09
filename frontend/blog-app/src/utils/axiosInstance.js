@@ -28,12 +28,33 @@ const checkBackendHealth = async () => {
 const wakeUpBackend = async () => {
   try {
     console.log("Attempting to wake up backend...");
-    await axios.get(`${BASE_URL}/health`, { timeout: 30000 });
+    const response = await axios.get(`${BASE_URL}/health`, { 
+      timeout: 30000,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     console.log("Backend is now active");
     return true;
   } catch (error) {
     console.error("Failed to wake up backend:", error.message);
-    return false;
+    
+    // Try ping endpoint as fallback
+    try {
+      await axios.get(`${BASE_URL}/ping`, { 
+        timeout: 30000,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      console.log("Backend responded to ping");
+      return true;
+    } catch (pingError) {
+      console.error("Ping also failed:", pingError.message);
+      return false;
+    }
   }
 };
 
@@ -75,6 +96,7 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+  withCredentials: true, // Enable credentials for CORS
 });
 
 // Request Interceptor

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
 
 import BlogLandingPage from "./pages/Blog/BlogLandingPage";
 import BlogPostView from "./pages/Blog/BlogPostView";
@@ -13,8 +14,21 @@ import BlogPostEditor from "./pages/Admin/BlogPostEditor";
 import Comments from "./pages/Admin/Comments";
 import UserProvider from "./context/userContext";
 import BackendStatusIndicator from "./components/BackendStatusIndicator";
+import { validateEnvironment, checkBackendConnectivity } from "./utils/environment";
 
 const App = () => {
+  useEffect(() => {
+    // Validate environment on app startup
+    const config = validateEnvironment();
+    
+    // Check backend connectivity
+    checkBackendConnectivity().then(isConnected => {
+      if (!isConnected) {
+        console.warn('Backend is not immediately reachable. This is normal for free tier deployments.');
+      }
+    });
+  }, []);
+
   return (
     <UserProvider>
       <div>

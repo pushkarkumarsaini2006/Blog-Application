@@ -34,19 +34,36 @@ const allowedOrigins = [
   "http://localhost:5173"
 ];
 
+// More permissive CORS configuration for debugging
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow REST tools, server-to-server, etc.
-      if (
-        allowedOrigins.includes(origin) ||
-        /\.onrender\.com$/.test(origin) ||
-        /\.netlify\.app$/.test(origin) ||
-        /\.vercel\.app$/.test(origin)
-      ) {
+      // Allow requests with no origin (like mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      
+      // Allow all onrender.com subdomains
+      if (origin.includes('.onrender.com')) {
         return callback(null, true);
       }
-      return callback(new Error("Not allowed by CORS"));
+      
+      // Allow specific origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Allow development origins
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+      
+      // Allow common deployment platforms
+      if (origin.includes('.netlify.app') || origin.includes('.vercel.app')) {
+        return callback(null, true);
+      }
+      
+      // Log and allow unknown origins for debugging (you can remove this in production)
+      console.log('Unknown origin:', origin);
+      return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -57,7 +74,9 @@ app.use(
       "Accept",
       "Origin",
       "Access-Control-Request-Method",
-      "Access-Control-Request-Headers"
+      "Access-Control-Request-Headers",
+      "Cache-Control",
+      "Pragma"
     ],
     exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
     preflightContinue: false,
@@ -68,10 +87,23 @@ app.use(
 // Connect Database
 connectDB();
 
+// Additional OPTIONS handler for CORS preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.sendStatus(200);
+});
+
 // Keep-alive mechanism for Render free tier
 const keepAlive = () => {
   setInterval(() => {
     console.log(`Keep-alive ping at ${new Date().toISOString()}`);
+    // Optional: Make a self-request to keep the server active
+    // This is commented out to avoid unnecessary requests
+    // axios.get(`${process.env.RENDER_EXTERNAL_URL || 'http://localhost:5000'}/health`).catch(() => {});
   }, 14 * 60 * 1000); // Ping every 14 minutes
 };
 
@@ -87,7 +119,8 @@ app.get('/health', (req, res) => {
     message: 'Blog Backend is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    cors: 'enabled'
   });
 });
 
@@ -96,7 +129,8 @@ app.get('/ping', (req, res) => {
   res.status(200).json({ 
     status: 'pong',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    cors: 'enabled'
   });
 });
 
@@ -117,10 +151,6 @@ app.get('/', (req, res) => {
     }
   });
 });
-
-// Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -228,6 +258,27 @@ app.use((err, req, res, next) => {
       stack: err.stack 
     });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err.stack);
+  
+  // CORS error
+  if (err.message.includes('CORS')) {
+    res.status(403).json({
+      error: 'CORS Error',
+      message: 'Not allowed by CORS policy',
+      origin: req.headers.origin || 'unknown'
+    });
+    return;
+  }
+  
+  // Default error
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : err.message
+  });
 });
 
 // Handle 404 routes
