@@ -1,63 +1,6 @@
 import axios from "axios";
 import { BASE_URL } from "./apiPaths";
 
-// Backend health check utility
-let backendHealthStatus = null;
-let lastHealthCheck = 0;
-const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
-
-const checkBackendHealth = async () => {
-  const now = Date.now();
-  if (now - lastHealthCheck < HEALTH_CHECK_INTERVAL && backendHealthStatus !== null) {
-    return backendHealthStatus;
-  }
-
-  try {
-    const response = await axios.get(`${BASE_URL}/health`, { timeout: 10000 });
-    backendHealthStatus = response.status === 200;
-    lastHealthCheck = now;
-    return backendHealthStatus;
-  } catch (error) {
-    backendHealthStatus = false;
-    lastHealthCheck = now;
-    return false;
-  }
-};
-
-// Wake up backend function
-const wakeUpBackend = async () => {
-  try {
-    console.log("Attempting to wake up backend...");
-    const response = await axios.get(`${BASE_URL}/health`, { 
-      timeout: 30000,
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
-    });
-    console.log("Backend is now active");
-    return true;
-  } catch (error) {
-    console.error("Failed to wake up backend:", error.message);
-    
-    // Try ping endpoint as fallback
-    try {
-      await axios.get(`${BASE_URL}/ping`, { 
-        timeout: 30000,
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-      console.log("Backend responded to ping");
-      return true;
-    } catch (pingError) {
-      console.error("Ping also failed:", pingError.message);
-      return false;
-    }
-  }
-};
-
 // Retry mechanism for failed requests
 const retryRequest = async (config, retryCount = 0) => {
   const maxRetries = 3;
@@ -91,7 +34,7 @@ const shouldRetry = (error) => {
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 80000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -101,19 +44,11 @@ const axiosInstance = axios.create({
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
-  async (config) => {
+  (config) => {
     const accessToken = localStorage.getItem("token");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
-
-    // Check backend health before making request
-    const isHealthy = await checkBackendHealth();
-    if (!isHealthy) {
-      console.warn("Backend appears to be sleeping. Attempting to wake it up...");
-      await wakeUpBackend();
-    }
-
     return config;
   },
   (error) => {
@@ -124,7 +59,6 @@ axiosInstance.interceptors.request.use(
 // Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
-    backendHealthStatus = true;
     return response;
   },
   async (error) => {
@@ -144,8 +78,7 @@ axiosInstance.interceptors.response.use(
     } else if (error.code === "ECONNABORTED") {
       console.error("Request timeout. Please try again.");
     } else if (error.code === "ERR_NETWORK") {
-      console.error("Network error. Backend might be sleeping.");
-      backendHealthStatus = false;
+      console.error("Network error. Please check your connection.");
     }
 
     // Retry logic for certain types of errors
@@ -161,9 +94,5 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// Export health check functions for use in components
-export const checkBackendStatus = checkBackendHealth;
-export const wakeBackend = wakeUpBackend;
 
 export default axiosInstance;

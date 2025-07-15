@@ -26,10 +26,7 @@ process.on('unhandledRejection', (err) => {
 
 // Improved CORS configuration
 const allowedOrigins = [
-  "https://blog-application-1-i0me.onrender.com",
-  "https://blog-application-1-1v3z.onrender.com",
-  "https://blog-application-54yd.onrender.com",
-  "https://blog-application-hgra.onrender.com",
+  "https://blog-application-1-i0me.onrender.com", // Current frontend deployment
   "http://localhost:3000",
   "http://localhost:5173"
 ];
@@ -97,20 +94,7 @@ app.options('*', (req, res) => {
   res.sendStatus(200);
 });
 
-// Keep-alive mechanism for Render free tier
-const keepAlive = () => {
-  setInterval(() => {
-    console.log(`Keep-alive ping at ${new Date().toISOString()}`);
-    // Optional: Make a self-request to keep the server active
-    // This is commented out to avoid unnecessary requests
-    // axios.get(`${process.env.RENDER_EXTERNAL_URL || 'http://localhost:5000'}/health`).catch(() => {});
-  }, 14 * 60 * 1000); // Ping every 14 minutes
-};
 
-// Start keep-alive only in production
-if (process.env.NODE_ENV === 'production') {
-  keepAlive();
-}
 
 // Health check endpoint for Render
 app.get('/health', (req, res) => {

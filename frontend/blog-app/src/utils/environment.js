@@ -9,7 +9,7 @@ export const validateEnvironment = () => {
   }
   
   const config = {
-    BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://blog-application-54yd.onrender.com',
+    BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000',
     NODE_ENV: import.meta.env.NODE_ENV || 'development',
     PROD: import.meta.env.PROD || false,
     DEV: import.meta.env.DEV || false,
@@ -22,7 +22,7 @@ export const validateEnvironment = () => {
 // Check if backend is reachable
 export const checkBackendConnectivity = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://blog-application-54yd.onrender.com'}/health`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

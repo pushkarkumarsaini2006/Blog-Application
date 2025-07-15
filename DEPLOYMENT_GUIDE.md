@@ -27,9 +27,9 @@ This blog application has been enhanced with robust error handling and backend c
 ```javascript
 // CORS origins - add your Render URLs here
 const allowedOrigins = [
-  "https://blog-application-1-i0me.onrender.com",
-  "https://blog-application-54yd.onrender.com",
-  // Add more as needed
+  "https://your-frontend-deployment.onrender.com",
+  "http://localhost:3000",
+  "http://localhost:5173"
 ];
 
 // Keep-alive mechanism (production only)
@@ -42,7 +42,7 @@ const keepAlive = () => {
 
 ### Frontend Configuration (`.env`)
 ```
-VITE_BACKEND_URL=https://blog-application-54yd.onrender.com
+VITE_BACKEND_URL=https://your-backend-deployment.onrender.com
 ```
 
 ## Components Added
