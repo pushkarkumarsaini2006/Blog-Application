@@ -19,27 +19,4 @@ export const validateEnvironment = () => {
   return config;
 };
 
-// Check if backend is reachable
-export const checkBackendConnectivity = async () => {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/health`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors',
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Backend connectivity check:', data);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('Backend connectivity check failed:', error);
-    return false;
-  }
-};
-
-export default { validateEnvironment, checkBackendConnectivity };
+export default { validateEnvironment };

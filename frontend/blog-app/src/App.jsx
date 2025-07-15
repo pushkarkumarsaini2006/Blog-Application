@@ -13,20 +13,12 @@ import BlogPosts from "./pages/Admin/BlogPosts";
 import BlogPostEditor from "./pages/Admin/BlogPostEditor";
 import Comments from "./pages/Admin/Comments";
 import UserProvider from "./context/userContext";
-import BackendStatusIndicator from "./components/BackendStatusIndicator";
-import { validateEnvironment, checkBackendConnectivity } from "./utils/environment";
+import { validateEnvironment } from "./utils/environment";
 
 const App = () => {
   useEffect(() => {
     // Validate environment on app startup
     const config = validateEnvironment();
-    
-    // Check backend connectivity
-    checkBackendConnectivity().then(isConnected => {
-      if (!isConnected) {
-        console.warn('Backend is not immediately reachable. This is normal for free tier deployments.');
-      }
-    });
   }, []);
 
   return (
@@ -89,8 +81,6 @@ const App = () => {
             animation: "none", // Disable container animations
           }}
         />
-        
-        <BackendStatusIndicator />
       </div>
     </UserProvider>
   );
