@@ -9,13 +9,20 @@
     "build": "echo 'Build completed'",
     "postinstall": "echo 'Dependencies installed successfully'",
     "prepare-deploy": "rm -f package-lock.json && npm cache clean --force && npm install",
-    "test-connection": "node -e \"require('./config/db')();\""
+    "test-connection": "node test-connection.js",
+    "debug": "NODE_ENV=development nodemon server.js",
+    "health-check": "node health-check.js"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "keywords": ["blog", "express", "mongodb", "render"],
+  "keywords": [
+    "blog",
+    "express",
+    "mongodb",
+    "render"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -30,6 +37,7 @@
     "multer": "^2.0.0"
   },
   "devDependencies": {
+    "axios": "^1.11.0",
     "nodemon": "^3.1.10"
   }
 }

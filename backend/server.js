@@ -4,6 +4,12 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 
+console.log("Starting Blog Application Backend...");
+console.log("Environment:", process.env.NODE_ENV);
+console.log("Port:", process.env.PORT);
+console.log("MongoDB URI:", process.env.MONGO_URI ? "Set" : "Missing");
+console.log("JWT Secret:", process.env.JWT_SECRET ? "Set" : "Missing");
+
 // Import routes
 const authRoutes = require("./routes/authRoutes");
 const blogPostRoutes = require("./routes/blogPostRoutes");
@@ -12,6 +18,10 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Graceful error handling for uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -27,9 +37,12 @@ process.on('unhandledRejection', (err) => {
 // Improved CORS configuration
 const allowedOrigins = [
   "https://blog-application-1-i0me.onrender.com", // Current frontend deployment
+  "https://blog-application-54yd.onrender.com", // Backend deployment URL
   "http://localhost:3000",
   "http://localhost:5173"
 ];
+
+console.log("Allowed CORS origins:", allowedOrigins);
 
 // More permissive CORS configuration for debugging
 app.use(
@@ -275,4 +288,12 @@ app.use('*', (req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🌐 Server URL: http://localhost:${PORT}`);
+  console.log(`📁 Uploads directory: ${path.join(__dirname, 'uploads')}`);
+  console.log(`🎯 Environment: ${process.env.NODE_ENV}`);
+  console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? '✅ Set' : '❌ Missing'}`);
+  console.log(`🗄️  MongoDB: ${process.env.MONGO_URI ? '✅ Configured' : '❌ Missing'}`);
+  console.log(`🤖 Gemini API: ${process.env.GEMINI_API_KEY ? '✅ Set' : '❌ Missing'}`);
+});

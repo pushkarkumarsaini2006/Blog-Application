@@ -12,10 +12,12 @@ const generateToken = (userId) => {
 // @access  Public
 const registerUser = async (req, res) => {
   try {
+    console.log("Registration attempt:", { email: req.body.email, name: req.body.name });
     const { name, email, password, profileImageUrl, bio, adminAccessToken } = req.body;
 
     // Validation
     if (!name || !email || !password) {
+      console.log("Validation failed - missing fields");
       return res.status(400).json({ 
         message: "Please provide name, email, and password",
         missing: {
@@ -29,16 +31,19 @@ const registerUser = async (req, res) => {
     // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      console.log("Invalid email format:", email);
       return res.status(400).json({ message: "Please provide a valid email address" });
     }
 
     // Password length validation
     if (password.length < 6) {
+      console.log("Password too short");
       return res.status(400).json({ message: "Password must be at least 6 characters long" });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
+      console.log("User already exists:", email);
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -52,6 +57,7 @@ const registerUser = async (req, res) => {
       adminAccessToken == process.env.ADMIN_ACCESS_TOKEN
     ) {
       role = "admin";
+      console.log("Admin user registered");
     }
 
     const user = await User.create({
@@ -62,6 +68,8 @@ const registerUser = async (req, res) => {
       bio: bio || "",
       role,
     });
+
+    console.log("User created successfully:", user._id);
 
     res.status(201).json({
       _id: user._id,
@@ -95,18 +103,29 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
+    console.log("Login attempt:", { email: req.body.email });
     const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      console.log("Login validation failed - missing credentials");
+      return res.status(400).json({ message: "Please provide email and password" });
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(500).json({ message: "Invalid email or password" });
+      console.log("User not found:", email);
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(500).json({ message: "Invalid email or password" });
+      console.log("Password mismatch for user:", email);
+      return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    console.log("Login successful for user:", email);
 
     // Return user data with JWT
     res.json({
@@ -118,7 +137,8 @@ const loginUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error during login", error: error.message });
   }
 };
 
