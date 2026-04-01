@@ -5,7 +5,218 @@ const {
   blogSummaryPrompt,
 } = require("../utils/prompts");
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const AI_MODEL_CANDIDATES = [
+  process.env.GEMINI_MODEL,
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+].filter(Boolean);
+
+const getAIClient = () => {
+  if (!process.env.GEMINI_API_KEY) {
+    const err = new Error("GEMINI_API_KEY is not configured on the server");
+    err.statusCode = 503;
+    throw err;
+  }
+
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+};
+
+const generateWithFallbackModel = async (prompt) => {
+  const ai = getAIClient();
+  let lastError = null;
+
+  for (const model of AI_MODEL_CANDIDATES) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: prompt,
+      });
+
+      const text = response?.text?.trim?.() || "";
+      if (!text) {
+        throw new Error("Empty response received from AI model");
+      }
+
+      return text;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Failed to generate AI content");
+};
+
+const extractJSONArray = (value) => {
+  const cleaned = (value || "")
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  const directParse = () => JSON.parse(cleaned);
+  try {
+    const parsed = directParse();
+    if (Array.isArray(parsed)) return parsed;
+  } catch (err) {
+    // Continue with bracket extraction fallback.
+  }
+
+  const firstBracket = cleaned.indexOf("[");
+  const lastBracket = cleaned.lastIndexOf("]");
+  if (firstBracket === -1 || lastBracket === -1 || lastBracket <= firstBracket) {
+    throw new Error("AI response did not contain a valid JSON array");
+  }
+
+  const jsonPart = cleaned.slice(firstBracket, lastBracket + 1);
+  const parsed = JSON.parse(jsonPart);
+  if (!Array.isArray(parsed)) {
+    throw new Error("AI response JSON is not an array");
+  }
+
+  return parsed;
+};
+
+const extractJSONObject = (value) => {
+  const cleaned = (value || "")
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (err) {
+    // Continue with brace extraction fallback.
+  }
+
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    throw new Error("AI response did not contain a valid JSON object");
+  }
+
+  const jsonPart = cleaned.slice(firstBrace, lastBrace + 1);
+  const parsed = JSON.parse(jsonPart);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("AI response JSON is not an object");
+  }
+
+  return parsed;
+};
+
+const toTagSlug = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 24);
+
+const buildLocalIdeas = (topics) => {
+  const topicText = String(topics || "technology").trim();
+  const topicTokens = topicText
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const firstTopic = topicTokens[0] || "Modern Web Development";
+  const secondTopic = topicTokens[1] || "Developer Productivity";
+
+  return [
+    {
+      title: `Practical ${firstTopic} Trends to Watch This Year`,
+      description:
+        "A focused look at what is changing quickly and what actually matters in real projects. Includes examples you can apply right away.",
+      tags: [toTagSlug(firstTopic), "industry-news", "best-practices"],
+      tone: "professional",
+    },
+    {
+      title: `Beginner Guide: Getting Started with ${firstTopic}`,
+      description:
+        "A step-by-step starter roadmap for newcomers, including common mistakes and quick wins for faster learning.",
+      tags: [toTagSlug(firstTopic), "beginner", "guide"],
+      tone: "beginner-friendly",
+    },
+    {
+      title: `${secondTopic}: What Worked for Us in Production`,
+      description:
+        "A practical thought piece with implementation lessons, trade-offs, and outcomes from a real-world setup.",
+      tags: [toTagSlug(secondTopic), "thoughts", "case-study"],
+      tone: "casual",
+    },
+    {
+      title: `Top 7 Tools to Improve ${firstTopic} Workflows`,
+      description:
+        "A curated list of tools and patterns that reduce friction and improve team velocity while maintaining quality.",
+      tags: [toTagSlug(firstTopic), "tools", "productivity"],
+      tone: "technical",
+    },
+    {
+      title: `Future of ${firstTopic}: News, Signals, and Predictions`,
+      description:
+        "A forward-looking analysis of current market signals and how teams can prepare for upcoming shifts.",
+      tags: [toTagSlug(firstTopic), "news", "future"],
+      tone: "insightful",
+    },
+  ];
+};
+
+const buildLocalBlogPost = (title, tone) => {
+  const safeTitle = String(title || "Untitled Post").trim();
+  const safeTone = String(tone || "clear").trim();
+
+  return `# ${safeTitle}
+
+## Introduction
+
+In this article, we explore **${safeTitle}** with a ${safeTone} tone. The goal is to provide practical guidance you can apply immediately.
+
+## Why This Matters
+
+- Teams need reliable patterns that scale.
+- Developers benefit from repeatable workflows.
+- Good decisions come from understanding trade-offs.
+
+## Core Concepts
+
+1. Define the problem before choosing tools.
+2. Keep architecture simple until complexity is proven necessary.
+3. Measure outcomes and iterate continuously.
+
+## Example
+
+\`\`\`js
+function planFeature(name) {
+  return {
+    name,
+    scope: "small",
+    validated: true,
+  };
+}
+\`\`\`
+
+## Conclusion
+
+${safeTitle} works best when you focus on clarity, incremental delivery, and measurable improvements. Start small, validate quickly, and refine as you learn.`;
+};
+
+const buildLocalReply = (content, author) => {
+  const authorName = author?.name || "there";
+  const snippet = String(content || "").slice(0, 120);
+  return `Thanks ${authorName} for sharing your thoughts. You raised a great point${snippet ? ` about "${snippet}${snippet.length >= 120 ? "..." : ""}"` : ""}. I agree that balancing practicality with long-term maintainability is key, and your comment adds helpful perspective.`;
+};
+
+const buildLocalSummary = (content) => {
+  const safeContent = String(content || "").replace(/\s+/g, " ").trim();
+  const preview = safeContent.slice(0, 280);
+  return {
+    title: "Quick Practical Summary",
+    summary: `${preview}${safeContent.length > 280 ? "..." : ""}\n\n## What You'll Learn\n- The main idea and its context\n- Practical steps to apply immediately\n- Key trade-offs to consider before implementation`,
+  };
+};
 
 // @desc    Generate blog content from title
 // @route   POST /api/ai/generate
@@ -19,19 +230,12 @@ const generateBlogPost = async (req, res) => {
     }
 
     const prompt = `Write a markdown-formatted blog post titled "${title}". Use a ${tone} tone. Include an introduction, subheadings, code examples if relevant, and a conclusion.`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: prompt,
-    });
-
-    let rawText = response.text;
+    const rawText = await generateWithFallbackModel(prompt);
     res.status(200).json(rawText);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to generate blog post",
-      error: error.message,
-    });
+    console.error("AI generateBlogPost failed, returning local fallback:", error.message);
+    const { title, tone } = req.body;
+    return res.status(200).json(buildLocalBlogPost(title, tone));
   }
 };
 
@@ -47,29 +251,14 @@ const generateBlogPostIdeas = async (req, res) => {
     }
 
     const prompt = blogPostIdeasPrompt(topics);
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: prompt,
-    });
-
-    let rawText = response.text;
-
-    // Clean it: Remove ```json and ``` from beginning and end
-    const cleanedText = rawText
-      .replace(/^```json\s*/, "") // remove starting ```json
-      .replace(/```$/, "") // remove ending ```
-      .trim(); // remove extra spaces
-
-    // Now safe to parse
-    const data = JSON.parse(cleanedText);
+    const rawText = await generateWithFallbackModel(prompt);
+    const data = extractJSONArray(rawText);
 
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to generate blog post ideas",
-      error: error.message,
-    });
+    console.error("AI generateBlogPostIdeas failed, returning local fallback:", error.message);
+    const { topics } = req.body;
+    return res.status(200).json(buildLocalIdeas(topics));
   }
 };
 
@@ -85,19 +274,12 @@ const generateCommentReply = async (req, res) => {
     }
 
     const prompt = generateReplyPrompt({ author, content });
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: prompt,
-    });
-
-    let rawText = response.text;
+    const rawText = await generateWithFallbackModel(prompt);
     res.status(200).json(rawText);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to generate comment reply",
-      error: error.message,
-    });
+    console.error("AI generateCommentReply failed, returning local fallback:", error.message);
+    const { author, content } = req.body;
+    return res.status(200).json(buildLocalReply(content, author));
   }
 };
 
@@ -113,28 +295,13 @@ const generatePostSummary = async (req, res) => {
     }
 
     const prompt = blogSummaryPrompt(content);
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: prompt,
-    });
-
-    let rawText = response.text;
-
-    // Clean it: Remove ```json and ``` from beginning and end
-    const cleanedText = rawText
-      .replace(/^```json\s*/, "") // remove starting ```json
-      .replace(/```$/, "") // remove ending ```
-      .trim(); // remove extra spaces
-
-    // Now safe to parse
-    const data = JSON.parse(cleanedText);
+    const rawText = await generateWithFallbackModel(prompt);
+    const data = extractJSONObject(rawText);
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to generate blog post summary",
-      error: error.message,
-    });
+    console.error("AI generatePostSummary failed, returning local fallback:", error.message);
+    const { content } = req.body;
+    return res.status(200).json(buildLocalSummary(content));
   }
 };
 
