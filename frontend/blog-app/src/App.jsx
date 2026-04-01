@@ -44,6 +44,10 @@ const App = () => {
               <Route path="/admin/comments" element={<Comments />} />
             </Route>
 
+            <Route element={<PrivateRoute allowedRoles={["admin", "member"]} />}>
+              <Route path="/write" element={<BlogPostEditor />} />
+            </Route>
+
             <Route path="/admin-login" element={<AdminLogin />} />
           </Routes>
         </Router>

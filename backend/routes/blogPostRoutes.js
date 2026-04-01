@@ -14,20 +14,11 @@ const {
 } = require("../controllers/blogPostController");
 const { protect } = require("../middlewares/authMiddleware");
 
-// Admin-only middleware
-const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role == 'admin') {
-    next();
-  } else {
-    res.status(403).json({ message: "Admin access only" });
-  }
-};
-
-router.post("/", protect, adminOnly, createPost);
+router.post("/", protect, createPost);
 router.get("/", getAllPosts);
 router.get("/slug/:slug", getPostBySlug);
-router.put("/:id", protect, adminOnly, updatePost);
-router.delete("/:id", protect, adminOnly, deletePost);
+router.put("/:id", protect, updatePost);
+router.delete("/:id", protect, deletePost);
 router.get("/tag/:tag", getPostsByTag);
 router.get("/search", searchPosts);
 router.post("/:id/view", incrementView);

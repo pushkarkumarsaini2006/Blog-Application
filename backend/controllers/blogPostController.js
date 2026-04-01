@@ -6,7 +6,15 @@ const mongoose = require("mongoose");
 // @access  Private (Admin only)
 const createPost = async (req, res) => {
   try {
-    const { title, content, coverImageUrl, tags, isDraft, generatedByAI } =
+    const {
+      title,
+      postType,
+      content,
+      coverImageUrl,
+      tags,
+      isDraft,
+      generatedByAI,
+    } =
       req.body;
 
     const slug = title
@@ -17,6 +25,7 @@ const createPost = async (req, res) => {
     const newPost = new BlogPost({
       title,
       slug,
+      postType: postType || "thought",
       content,
       coverImageUrl,
       tags,
@@ -95,6 +104,7 @@ const deletePost = async (req, res) => {
 const getAllPosts = async (req, res) => {
   try {
     const status = req.query.status || "published";
+    const postType = req.query.postType;
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
@@ -103,6 +113,9 @@ const getAllPosts = async (req, res) => {
     let filter = {};
     if (status === "published") filter.isDraft = false;
     else if (status === "draft") filter.isDraft = true;
+    if (postType === "news" || postType === "thought") {
+      filter.postType = postType;
+    }
 
     // Fetch paginated posts
     const posts = await BlogPost.find(filter)
@@ -160,9 +173,17 @@ const getPostBySlug = async (req, res) => {
 // @access  Public
 const getPostsByTag = async (req, res) => {
   try {
-    const posts = await BlogPost.find({
+    const postType = req.query.postType;
+    const filter = {
       tags: req.params.tag,
       isDraft: false,
+    };
+    if (postType === "news" || postType === "thought") {
+      filter.postType = postType;
+    }
+
+    const posts = await BlogPost.find({
+      ...filter,
     }).populate("author", "name profileImageUrl");
     res.json(posts);
   } catch (err) {
@@ -178,12 +199,20 @@ const getPostsByTag = async (req, res) => {
 const searchPosts = async (req, res) => {
   try {
     const q = req.query.q;
-    const posts = await BlogPost.find({
+    const postType = req.query.postType;
+    const filter = {
       isDraft: false,
       $or: [
         { title: { $regex: q, $options: "i" } },
         { content: { $regex: q, $options: "i" } },
       ],
+    };
+    if (postType === "news" || postType === "thought") {
+      filter.postType = postType;
+    }
+
+    const posts = await BlogPost.find({
+      ...filter,
     }).populate("author", "name profileImageUrl");
     res.json(posts);
   } catch (err) {
@@ -226,8 +255,14 @@ const likePost = async (req, res) => {
 // @access  Private
 const getTopPosts = async (req, res) => {
   try {
+    const postType = req.query.postType;
+    const filter = { isDraft: false };
+    if (postType === "news" || postType === "thought") {
+      filter.postType = postType;
+    }
+
     // Top performing posts
-    const posts = await BlogPost.find({ isDraft: false })
+    const posts = await BlogPost.find(filter)
       .sort({ views: -1, likes: -1 })
       .limit(5);
 

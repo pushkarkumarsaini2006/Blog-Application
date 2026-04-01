@@ -21,14 +21,20 @@ import uploadImage from "../../utils/uploadImage";
 import toast from "react-hot-toast";
 import { getToastMessagesByType } from "../../utils/helper";
 import DeleteAlertContent from "../../components/DeleteAlertContent";
+import { useContext } from "react";
+import { UserContext } from "../../context/userContext";
 
 const BlogPostEditor = ({ isEdit }) => {
   const navigate = useNavigate();
   const { postSlug = "" } = useParams();
+  const { user } = useContext(UserContext);
+
+  const getPostListPath = () => (user?.role === "admin" ? "/admin/posts" : "/");
 
   const [postData, setPostData] = useState({
     id: "",
     title: "",
+    postType: "thought",
     content: "",
     coverImageUrl: "",
     coverPreview: "",
@@ -117,6 +123,7 @@ const BlogPostEditor = ({ isEdit }) => {
 
       const reqPayload = {
         title: postData.title,
+        postType: postData.postType,
         content: postData.content,
         coverImageUrl,
         tags: postData.tags,
@@ -137,7 +144,7 @@ const BlogPostEditor = ({ isEdit }) => {
             isDraft ? "draft" : isEdit ? "edit" : "published"
           )
         );
-        navigate("/admin/posts");
+        navigate(getPostListPath());
       }
     } catch (error) {
       setError("Failed to publish blog post. Please try again.");
@@ -161,6 +168,7 @@ const BlogPostEditor = ({ isEdit }) => {
           ...prevState,
           id: data._id,
           title: data.title,
+          postType: data.postType || "thought",
           content: data.content,
           coverPreview: data.coverImageUrl,
           tags: data.tags,
@@ -180,7 +188,7 @@ const BlogPostEditor = ({ isEdit }) => {
 
       toast.success("Blog Post Deleted Successfully");
       setOpenDeleteAlert(false);
-      navigate("/admin/posts");
+      navigate(getPostListPath());
     } catch (error) {
       console.error("Error deleting blog post:", error);
     }
@@ -257,6 +265,22 @@ const BlogPostEditor = ({ isEdit }) => {
                   handleValueChange("title", target.value)
                 }
               />
+            </div>
+
+            <div className="mt-4">
+              <label className="text-xs font-medium text-slate-600">
+                Post Type
+              </label>
+              <select
+                className="form-input"
+                value={postData.postType}
+                onChange={({ target }) =>
+                  handleValueChange("postType", target.value)
+                }
+              >
+                <option value="thought">Thought</option>
+                <option value="news">News</option>
+              </select>
             </div>
 
             <div className="mt-4">

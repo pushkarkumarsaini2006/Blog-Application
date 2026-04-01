@@ -38,6 +38,12 @@ export const BLOG_NAVBAR_DATA = [
     path: "/",
   },
   {
+    id: "00",
+    label: "Write",
+    icon: LuLayoutDashboard,
+    path: "/write",
+  },
+  {
     id: "02",
     label: "React JS",
     icon: LuTag,

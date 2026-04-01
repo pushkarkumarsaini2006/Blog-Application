@@ -4,6 +4,11 @@ const BlogPostSchema = new mongoose.Schema(
     {
       title: { type: String, required: true },
       slug: { type: String, required: true, unique: true },
+      postType: {
+        type: String,
+        enum: ["news", "thought"],
+        default: "thought",
+      },
       content: { type: String, required: true }, // markdown
       coverImageUrl: { type: String, default: null },
       tags: [{ type: String }],
