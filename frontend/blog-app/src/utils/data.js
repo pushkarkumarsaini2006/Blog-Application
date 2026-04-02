@@ -45,14 +45,14 @@ export const BLOG_NAVBAR_DATA = [
   },
   {
     id: "02",
-    label: "React JS",
+    label: "Development",
     icon: LuTag,
-    path: "/tag/React",
+    path: "/tag/Development",
   },
   {
     id: "03",
-    label: "Next JS",
+    label: "DSA",
     icon: LuTag,
-    path: "/tag/Next.js",
+    path: "/tag/DSA",
   },
 ]

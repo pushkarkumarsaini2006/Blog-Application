@@ -105,6 +105,8 @@ const getAllPosts = async (req, res) => {
   try {
     const status = req.query.status || "published";
     const postType = req.query.postType;
+    const random = req.query.random === "true";
+    const randomLimit = Math.max(parseInt(req.query.limit) || 5, 1);
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
@@ -115,6 +117,37 @@ const getAllPosts = async (req, res) => {
     else if (status === "draft") filter.isDraft = true;
     if (postType === "news" || postType === "thought") {
       filter.postType = postType;
+    }
+
+    if (random) {
+      let posts = await BlogPost.aggregate([
+        { $match: filter },
+        { $sample: { size: randomLimit } },
+      ]);
+
+      posts = await BlogPost.populate(posts, {
+        path: "author",
+        select: "name profileImageUrl",
+      });
+
+      const [totalCount, allCount, publishedCount, draftCount] = await Promise.all([
+        BlogPost.countDocuments(filter),
+        BlogPost.countDocuments(),
+        BlogPost.countDocuments({ isDraft: false }),
+        BlogPost.countDocuments({ isDraft: true }),
+      ]);
+
+      return res.json({
+        posts,
+        page: 1,
+        totalPages: 1,
+        totalCount,
+        counts: {
+          all: allCount,
+          published: publishedCount,
+          draft: draftCount,
+        },
+      });
     }
 
     // Fetch paginated posts

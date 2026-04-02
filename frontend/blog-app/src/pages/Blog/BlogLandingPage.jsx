@@ -17,6 +17,7 @@ import useApiCall from "../../hooks/useApiCall";
 const BlogLandingPage = () => {
   const navigate = useNavigate();
 
+  const [thoughtPostList, setThoughtPostList] = useState([]);
   const [blogPostList, setBlogPostList] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
@@ -36,6 +37,24 @@ const BlogLandingPage = () => {
   const { execute: getAllPosts } = useApiCall(fetchPosts, {
     customMessage: "Failed to load blog posts. The backend might be starting up...",
     onRetry: () => getAllPosts(page)
+  });
+
+  const fetchRandomThoughtPosts = async () => {
+    const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
+      params: {
+        status: "published",
+        postType: "thought",
+        random: true,
+        limit: 3,
+      },
+    });
+
+    return response.data;
+  };
+
+  const { execute: getRandomThoughtPosts } = useApiCall(fetchRandomThoughtPosts, {
+    customMessage: "Failed to load thoughts.",
+    silent: true,
   });
 
   // Load posts with error handling
@@ -68,7 +87,17 @@ const BlogLandingPage = () => {
   // Initial load
   useEffect(() => {
     loadPosts(1);
+    getRandomThoughts();
   }, []);
+
+  const getRandomThoughts = async () => {
+    try {
+      const { posts } = await getRandomThoughtPosts();
+      setThoughtPostList(posts || []);
+    } catch (error) {
+      console.error("Error loading thoughts:", error);
+    }
+  };
 
   const handleClick = (post) => {
     navigate(`/${post.slug}`);
@@ -76,6 +105,46 @@ const BlogLandingPage = () => {
   return <BlogLayout>
     <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 md:col-span-9">
+          <div>
+            <h4 className="text-lg text-black font-semibold mb-4">Thoughts</h4>
+            {thoughtPostList.length > 0 && (
+              <FeaturedBlogPost
+                title={thoughtPostList[0].title}
+                coverImageUrl={thoughtPostList[0].coverImageUrl}
+                description={thoughtPostList[0].content}
+                tags={thoughtPostList[0].tags}
+                updatedOn={
+                  thoughtPostList[0].updatedAt
+                    ? moment(thoughtPostList[0].updatedAt).format("Do MMM YYYY")
+                    : "-"
+                }
+                authorName={thoughtPostList[0].author?.name || "Anonymous"}
+                authProfileImg={thoughtPostList[0].author?.profileImageUrl || ""}
+                onClick={() => handleClick(thoughtPostList[0])}
+              />
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+              {thoughtPostList.length > 1 &&
+                thoughtPostList.slice(1).map((item) => (
+                  <BlogPostSummaryCard
+                    key={item._id}
+                    title={item.title}
+                    coverImageUrl={item.coverImageUrl}
+                    description={item.content}
+                    tags={item.tags}
+                    updatedOn={
+                      item.updatedAt ? moment(item.updatedAt).format("Do MMM YYYY") : "-"
+                    }
+                    authorName={item.author?.name || "Anonymous"}
+                    authProfileImg={item.author?.profileImageUrl || ""}
+                    onClick={() => handleClick(item)}
+                  />
+                ))}
+            </div>
+          </div>
+
+          <h4 className="text-lg text-black font-semibold mt-10 mb-4">Blog</h4>
           {blogPostList.length > 0 && (
             <FeaturedBlogPost
               title={blogPostList[0].title}
@@ -87,8 +156,8 @@ const BlogLandingPage = () => {
                   ? moment(blogPostList[0].updatedAt).format("Do MMM YYYY")
                   : "-"
               }
-              authorName={blogPostList[0].author.name}
-              authProfileImg={blogPostList[0].author.profileImageUrl}
+              authorName={blogPostList[0].author?.name || "Anonymous"}
+              authProfileImg={blogPostList[0].author?.profileImageUrl || ""}
               onClick={() => handleClick(blogPostList[0])}
             />
           )}
@@ -109,8 +178,8 @@ const BlogLandingPage = () => {
                         ? moment(item.updatedAt).format("Do MMM YYYY")
                         : "-"
                     }
-                    authorName={item.author.name}
-                    authProfileImg={item.author.profileImageUrl}
+                    authorName={item.author?.name || "Anonymous"}
+                    authProfileImg={item.author?.profileImageUrl || ""}
                     onClick={() => handleClick(item)}
                   />
                 ))}

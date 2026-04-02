@@ -9,24 +9,31 @@ const TrendingPostsSection = () => {
   const navigate = useNavigate();
   const [postList, setPostList] = useState([]);
 
-  // fetch trending blog posts with error handling
-  const fetchTrendingPosts = async () => {
-    const response = await axiosInstance.get(API_PATHS.POSTS.GET_TRENDING_POSTS);
+  // fetch random news posts with error handling
+  const fetchNewsPosts = async () => {
+    const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
+      params: {
+        status: "published",
+        postType: "news",
+        random: true,
+        limit: 5,
+      },
+    });
     return response.data;
   };
 
-  const { execute: getTrendingPosts } = useApiCall(fetchTrendingPosts, {
-    customMessage: "Failed to load trending posts. The backend might be starting up...",
-    silent: true // Don't show toast errors for trending posts
+  const { execute: getNewsPosts } = useApiCall(fetchNewsPosts, {
+    customMessage: "Failed to load news posts. The backend might be starting up...",
+    silent: true // Don't show toast errors for optional sidebar section
   });
 
-  const loadTrendingPosts = async () => {
+  const loadNewsPosts = async () => {
     try {
-      const data = await getTrendingPosts();
-      setPostList(data?.length > 0 ? data : []);
+      const data = await getNewsPosts();
+      setPostList(data?.posts?.length > 0 ? data.posts : []);
     } catch (error) {
-      console.error("Error loading trending posts:", error);
-      // Silently fail for trending posts
+      console.error("Error loading news posts:", error);
+      // Silently fail for optional sidebar section
     }
   };
 
@@ -36,11 +43,11 @@ const TrendingPostsSection = () => {
   };
 
   useEffect(() => {
-    loadTrendingPosts();
+    loadNewsPosts();
     return () => {};
   }, []);
   return <div>
-      <h4 className="text-base text-black font-medium mb-3">Recent Posts</h4>
+      <h4 className="text-base text-black font-medium mb-3">News</h4>
 
       {postList.length > 0 &&
         postList.map((item) => (
