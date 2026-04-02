@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { IMAGE_CONFIG } from "./config";
 
 export const getInitials = (title) => {
   if (!title) return "";

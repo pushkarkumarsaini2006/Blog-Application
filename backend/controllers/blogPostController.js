@@ -1,6 +1,32 @@
 const BlogPost = require("../models/BlogPost");
 const mongoose = require("mongoose");
 
+const generateSlug = (value = "") =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "");
+
+const getThoughtTitleFromContent = (content = "") => {
+  const plain = content.replace(/[#*_`>[\]()]/g, " ").replace(/\s+/g, " ").trim();
+  const words = plain.split(" ").filter(Boolean).slice(0, 8);
+  return words.length ? words.join(" ") : "Quick Thought";
+};
+
+const getUniqueSlug = async (baseTitle) => {
+  const baseSlug = generateSlug(baseTitle) || `post-${Date.now()}`;
+  let slug = baseSlug;
+  let count = 1;
+
+  while (await BlogPost.exists({ slug })) {
+    slug = `${baseSlug}-${count}`;
+    count += 1;
+  }
+
+  return slug;
+};
+
 // @desc    Create a new blog post
 // @route   POST /api/posts
 // @access  Private (Admin only)
@@ -17,18 +43,24 @@ const createPost = async (req, res) => {
     } =
       req.body;
 
-    const slug = title
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+    const normalizedPostType = ["blog", "news", "thought"].includes(postType)
+      ? postType
+      : "thought";
+
+    const normalizedTitle =
+      normalizedPostType === "thought"
+        ? (title || "").trim() || getThoughtTitleFromContent(content)
+        : (title || "").trim();
+
+    const slug = await getUniqueSlug(normalizedTitle);
 
     const newPost = new BlogPost({
-      title,
+      title: normalizedTitle,
       slug,
-      postType: postType || "thought",
+      postType: normalizedPostType,
       content,
       coverImageUrl,
-      tags,
+      tags: Array.isArray(tags) ? tags : [],
       author: req.user._id,
       isDraft,
       generatedByAI,

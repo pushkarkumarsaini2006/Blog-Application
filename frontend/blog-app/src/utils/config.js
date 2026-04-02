@@ -3,8 +3,8 @@
 // Default image handling
 export const IMAGE_CONFIG = {
   // Fallback images for different contexts
-  FALLBACK_PROFILE: '/assets/default-profile.svg',
-  FALLBACK_COVER: '/assets/default-cover.svg',
+  FALLBACK_PROFILE: '/default-profile.svg',
+  FALLBACK_COVER: '/default-cover.svg',
   
   // Image loading states
   LOADING_PLACEHOLDER: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOWNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TG9hZGluZy4uLjwvdGV4dD4KICA8L3N2Zz4K',

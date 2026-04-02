@@ -166,6 +166,7 @@ const SignUp = ({setCurrentPage}) => {
           <p className="text-[13px] text-slate-800 mt-3">
             Already an account?{" "}
             <button
+              type="button"
               className="font-medium text-primary underline cursor-pointer"
               onClick={() => {
                 setCurrentPage("login");

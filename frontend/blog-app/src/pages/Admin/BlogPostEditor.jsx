@@ -38,7 +38,7 @@ const BlogPostEditor = ({ isEdit }) => {
     content: "",
     coverImageUrl: "",
     coverPreview: "",
-    tags: "",
+    tags: [],
     isDraft: "",
     generatedByAI: false,
   });
@@ -87,8 +87,9 @@ const BlogPostEditor = ({ isEdit }) => {
     let coverImageUrl = "";
     const requiresCoverImage =
       postData.postType === "blog" || postData.postType === "news";
+    const requiresTitleAndTags = postData.postType !== "thought";
 
-    if (!postData.title.trim()) {
+    if (requiresTitleAndTags && !postData.title.trim()) {
       setError("Please enter a title.");
       return;
     }
@@ -108,7 +109,7 @@ const BlogPostEditor = ({ isEdit }) => {
           return;
         }
       }
-      if (!postData.tags.length) {
+      if (requiresTitleAndTags && !postData.tags.length) {
         setError("Please add some tags.");
         return;
       }
@@ -130,7 +131,7 @@ const BlogPostEditor = ({ isEdit }) => {
         postType: postData.postType,
         content: postData.content,
         coverImageUrl,
-        tags: postData.tags,
+        tags: postData.postType === "thought" ? [] : postData.tags,
         isDraft: isDraft ? true : false,
         generatedByAI: true,
       };
@@ -208,6 +209,8 @@ const BlogPostEditor = ({ isEdit }) => {
     return () => {};
   }, []);
 
+  const isThoughtPost = postData.postType === "thought";
+
   return (
     <DashboardLayout activeMenu="Create Post">
       <div className="my-5">
@@ -256,20 +259,22 @@ const BlogPostEditor = ({ isEdit }) => {
 
             {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
 
-            <div className="mt-4">
-              <label className="text-xs font-medium text-slate-600">
-                Post Title
-              </label>
+            {!isThoughtPost && (
+              <div className="mt-4">
+                <label className="text-xs font-medium text-slate-600">
+                  Post Title
+                </label>
 
-              <input
-                placeholder="How to Build a MERN App"
-                className="form-input"
-                value={postData.title}
-                onChange={({ target }) =>
-                  handleValueChange("title", target.value)
-                }
-              />
-            </div>
+                <input
+                  placeholder="How to Build a MERN App"
+                  className="form-input"
+                  value={postData.title}
+                  onChange={({ target }) =>
+                    handleValueChange("title", target.value)
+                  }
+                />
+              </div>
+            )}
 
             <div className="mt-4">
               <label className="text-xs font-medium text-slate-600">
@@ -288,14 +293,16 @@ const BlogPostEditor = ({ isEdit }) => {
               </select>
             </div>
 
-            <div className="mt-4">
-              <CoverImageSelector
-                image={postData.coverImageUrl}
-                setImage={(value) => handleValueChange("coverImageUrl", value)}
-                preview={postData.coverPreview}
-                setPreview={(value) => handleValueChange("coverPreview", value)}
-              />
-            </div>
+            {!isThoughtPost && (
+              <div className="mt-4">
+                <CoverImageSelector
+                  image={postData.coverImageUrl}
+                  setImage={(value) => handleValueChange("coverImageUrl", value)}
+                  preview={postData.coverPreview}
+                  setPreview={(value) => handleValueChange("coverPreview", value)}
+                />
+              </div>
+            )}
 
             <div className="mt-3">
               <label className="text-xs font-medium text-slate-600">
@@ -327,19 +334,21 @@ const BlogPostEditor = ({ isEdit }) => {
               </div>
             </div>
 
-            <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600">Tags</label>
+            {!isThoughtPost && (
+              <div className="mt-3">
+                <label className="text-xs font-medium text-slate-600">Tags</label>
 
-              <TagInput
-                tags={postData?.tags || []}
-                setTags={(data) => {
-                  handleValueChange("tags", data);
-                }}
-              />
-            </div>
+                <TagInput
+                  tags={postData?.tags || []}
+                  setTags={(data) => {
+                    handleValueChange("tags", data);
+                  }}
+                />
+              </div>
+            )}
           </div>
 
-          {!isEdit && (
+          {!isEdit && !isThoughtPost && (
             <div className="form-card col-span-12 md:col-span-4 p-0">
               <div className="flex items-center justify-between px-6 pt-6">
                 <h4 className="text-sm md:text-base font-medium inline-flex items-center gap-2">
