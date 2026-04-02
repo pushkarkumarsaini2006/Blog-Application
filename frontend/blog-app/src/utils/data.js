@@ -17,7 +17,7 @@ export const SIDE_MENU_DATA = [
 
   {
     id: "02",
-    label: "Blog Posts",
+    label: "Create Post",
     icon: LuGalleryVerticalEnd,
     path: "/admin/posts",
   },
@@ -36,12 +36,6 @@ export const BLOG_NAVBAR_DATA = [
     label: "Home",
     icon: LuLayoutTemplate,
     path: "/",
-  },
-  {
-    id: "00",
-    label: "Write",
-    icon: LuLayoutDashboard,
-    path: "/write",
   },
   {
     id: "02",

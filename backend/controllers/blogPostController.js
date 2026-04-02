@@ -115,7 +115,7 @@ const getAllPosts = async (req, res) => {
     let filter = {};
     if (status === "published") filter.isDraft = false;
     else if (status === "draft") filter.isDraft = true;
-    if (postType === "news" || postType === "thought") {
+    if (postType === "blog" || postType === "news" || postType === "thought") {
       filter.postType = postType;
     }
 
@@ -211,7 +211,7 @@ const getPostsByTag = async (req, res) => {
       tags: req.params.tag,
       isDraft: false,
     };
-    if (postType === "news" || postType === "thought") {
+    if (postType === "blog" || postType === "news" || postType === "thought") {
       filter.postType = postType;
     }
 
@@ -240,7 +240,7 @@ const searchPosts = async (req, res) => {
         { content: { $regex: q, $options: "i" } },
       ],
     };
-    if (postType === "news" || postType === "thought") {
+    if (postType === "blog" || postType === "news" || postType === "thought") {
       filter.postType = postType;
     }
 
@@ -290,7 +290,7 @@ const getTopPosts = async (req, res) => {
   try {
     const postType = req.query.postType;
     const filter = { isDraft: false };
-    if (postType === "news" || postType === "thought") {
+    if (postType === "blog" || postType === "news" || postType === "thought") {
       filter.postType = postType;
     }
 

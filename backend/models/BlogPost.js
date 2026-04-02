@@ -6,7 +6,7 @@ const BlogPostSchema = new mongoose.Schema(
       slug: { type: String, required: true, unique: true },
       postType: {
         type: String,
-        enum: ["news", "thought"],
+        enum: ["blog", "news", "thought"],
         default: "thought",
       },
       content: { type: String, required: true }, // markdown

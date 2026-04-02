@@ -278,6 +278,7 @@ const BlogPostEditor = ({ isEdit }) => {
                   handleValueChange("postType", target.value)
                 }
               >
+                <option value="blog">Blog</option>
                 <option value="thought">Thought</option>
                 <option value="news">News</option>
               </select>
