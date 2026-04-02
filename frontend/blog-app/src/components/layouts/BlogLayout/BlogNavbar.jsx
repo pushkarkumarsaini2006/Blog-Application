@@ -17,6 +17,14 @@ const BlogNavbar = ({ activeMenu }) => {
   const { user, setOpenAuthForm } = useContext(UserContext);
   const [openSideMenu, setOpenSideMenu] = useState(false);
   const [openSearchBar, setOpenSearchBar] = useState(false);
+  const isAdmin = user?.role === "admin";
+
+  const blogNavItems = BLOG_NAVBAR_DATA.filter((item) => {
+    if (item?.onlySideMenu) return false;
+    if (item?.adminOnly && !isAdmin) return false;
+    if (item?.hideForAdmin && isAdmin) return false;
+    return true;
+  });
 
   return (
     <>
@@ -45,9 +53,7 @@ const BlogNavbar = ({ activeMenu }) => {
 
           <nav className="hidden md:flex items-center gap-10">
             <ul className="flex items-center gap-10 list-none">
-              {BLOG_NAVBAR_DATA.map((item, index) => {
-                if (item?.onlySideMenu) return null;
-
+              {blogNavItems.map((item, index) => {
                 return (
                   <li key={item.id}>
                     <Link 

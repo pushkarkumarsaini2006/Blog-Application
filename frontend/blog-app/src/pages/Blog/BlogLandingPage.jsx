@@ -28,6 +28,7 @@ const BlogLandingPage = () => {
     const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
       params: {
         status: "published",
+        postType: "blog",
         page: pageNumber,
       },
     });

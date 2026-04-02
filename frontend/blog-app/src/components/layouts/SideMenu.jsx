@@ -9,6 +9,14 @@ import ProfileImage from "../ProfileImage";
 const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
+  const isAdmin = user?.role === "admin";
+
+  const menuData = (isBlogMenu ? BLOG_NAVBAR_DATA : SIDE_MENU_DATA).filter((item) => {
+    if (!isBlogMenu) return true;
+    if (item?.adminOnly && !isAdmin) return false;
+    if (item?.hideForAdmin && isAdmin) return false;
+    return true;
+  });
 
   const handleClick = (route) => {
     if (route === "logout") {
@@ -58,7 +66,7 @@ const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
         </div>
       )}
 
-      {(isBlogMenu ? BLOG_NAVBAR_DATA : SIDE_MENU_DATA).map((item, index) => (
+      {menuData.map((item, index) => (
         <button
           key={`menu_${index}`}
           className={`w-full flex items-center gap-4 text-[15px] ${

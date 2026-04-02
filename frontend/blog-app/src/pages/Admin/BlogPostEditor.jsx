@@ -85,6 +85,8 @@ const BlogPostEditor = ({ isEdit }) => {
   // Handle Blog Post Publish
   const handlePublish = async (isDraft) => {
     let coverImageUrl = "";
+    const requiresCoverImage =
+      postData.postType === "blog" || postData.postType === "news";
 
     if (!postData.title.trim()) {
       setError("Please enter a title.");
@@ -96,13 +98,15 @@ const BlogPostEditor = ({ isEdit }) => {
     }
 
     if (!isDraft) {
-      if (!isEdit && !postData.coverImageUrl) {
-        setError("Please select a cover image.");
-        return;
-      }
-      if (isEdit && !postData.coverImageUrl && !postData.coverPreview) {
-        setError("Please select a cover image.");
-        return;
+      if (requiresCoverImage) {
+        if (!isEdit && !postData.coverImageUrl) {
+          setError("Please select a cover image.");
+          return;
+        }
+        if (isEdit && !postData.coverImageUrl && !postData.coverPreview) {
+          setError("Please select a cover image.");
+          return;
+        }
       }
       if (!postData.tags.length) {
         setError("Please add some tags.");
@@ -205,7 +209,7 @@ const BlogPostEditor = ({ isEdit }) => {
   }, []);
 
   return (
-    <DashboardLayout activeMenu="Blog Posts">
+    <DashboardLayout activeMenu="Create Post">
       <div className="my-5">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 my-4">
           <div className="form-card p-6 col-span-12 md:col-span-8">

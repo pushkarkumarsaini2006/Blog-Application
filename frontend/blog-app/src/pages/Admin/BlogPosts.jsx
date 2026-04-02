@@ -92,7 +92,7 @@ const BlogPosts = () => {
   }, [filterStatus]);
 
   return (
-    <DashboardLayout activeMenu="Blog Posts">
+    <DashboardLayout activeMenu="Create Post">
       <div className="w-auto sm:max-w-[900px] mx-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold mt-5 mb-5">Blog Posts</h2>
