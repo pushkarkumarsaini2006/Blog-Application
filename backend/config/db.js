@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { syncAllPostTypeMirrors } = require("../utils/postTypeMirrorSync");
 
-const ensurePostCollectionName = async () => {
+const ensureBlogPostCollectionName = async () => {
   const db = mongoose.connection.db;
   if (!db) {
     return;
@@ -10,15 +10,15 @@ const ensurePostCollectionName = async () => {
   const collectionInfos = await db.listCollections({}, { nameOnly: true }).toArray();
   const collectionNames = collectionInfos.map((item) => item.name);
 
-  const hasLegacyBlogPosts = collectionNames.includes("blogposts");
-  const hasPost = collectionNames.includes("post");
+  const hasLegacyBlogPosts = collectionNames.includes("post");
+  const hasBlogPost = collectionNames.includes("blogpost");
 
-  if (!hasLegacyBlogPosts || hasPost) {
+  if (!hasLegacyBlogPosts || hasBlogPost) {
     return;
   }
 
-  await db.collection("blogposts").rename("post");
-  console.log("Renamed MongoDB collection 'blogposts' to 'post'");
+  await db.collection("post").rename("blogpost");
+  console.log("Renamed MongoDB collection 'post' to 'blogpost'");
 };
 
 const connectDB = async () => {
@@ -47,9 +47,9 @@ const connectDB = async () => {
     });
 
     try {
-      await ensurePostCollectionName();
+      await ensureBlogPostCollectionName();
     } catch (renameError) {
-      console.error("Failed to rename blogposts collection:", renameError.message);
+      console.error("Failed to rename post collection:", renameError.message);
     }
 
     try {

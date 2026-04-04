@@ -18,7 +18,7 @@ const BlogPostSchema = new mongoose.Schema(
       likes: { type: Number, default: 0 },
       generatedByAI: { type: Boolean, default: false },
     },
-    { timestamps: true, collection: "post" }
+    { timestamps: true, collection: "blogpost" }
   );
   
 module.exports = mongoose.model("BlogPost", BlogPostSchema);
