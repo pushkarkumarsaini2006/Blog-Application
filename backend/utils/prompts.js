@@ -1,5 +1,18 @@
-const blogPostIdeasPrompt = (topic) => `
+const blogPostIdeasPrompt = (topic, options = {}) => {
+  const profileName = String(options.profileName || "").trim();
+  const profileBio = String(options.profileBio || "").trim();
+  const refreshToken = String(options.refreshToken || "").trim();
+
+  return `
     Generate a list of 5 blog post ideas related to ${topic}.
+
+Profile context:
+- Author name: ${profileName || "Unknown"}
+- Author bio/interests: ${profileBio || "Not provided"}
+- Refresh token: ${refreshToken || "none"}
+
+Use the profile context to personalize suggestions. If bio/interests are available, align ideas to that focus.
+Ensure the 5 ideas are distinct and avoid repeating previous patterns.
 
 For each blog post idea, return:
 - a title
@@ -17,7 +30,8 @@ Return the result as an array of JSON objects in this format:
   }
 ]
 Important: Do NOT add any extra text outside the JSON format. Only return valid JSON.
-    `;
+  `;
+};
 
 function generateReplyPrompt(comment) {
   const authorName = comment.author?.name || "User";

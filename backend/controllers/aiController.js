@@ -115,8 +115,32 @@ const toTagSlug = (value) =>
     .replace(/\s+/g, "-")
     .slice(0, 24);
 
-const buildLocalIdeas = (topics) => {
+const deriveProfileTopics = (user = {}) => {
+  const fromBio = String(user.bio || "")
+    .split(/[,.|/]/)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 2)
+    .slice(0, 3);
+
+  if (fromBio.length > 0) {
+    return fromBio;
+  }
+
+  const fallbackFromName = String(user.name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 1)
+    .map((namePart) => `${namePart}'s interests`);
+
+  return fallbackFromName;
+};
+
+const buildLocalIdeas = (topics, options = {}) => {
   const topicText = String(topics || "technology").trim();
+  const profileName = String(options.profileName || "").trim();
+  const refreshToken = String(options.refreshToken || "").trim();
+
   const topicTokens = topicText
     .split(",")
     .map((t) => t.trim())
@@ -125,9 +149,9 @@ const buildLocalIdeas = (topics) => {
   const firstTopic = topicTokens[0] || "Modern Web Development";
   const secondTopic = topicTokens[1] || "Developer Productivity";
 
-  return [
+  const baseIdeas = [
     {
-      title: `Practical ${firstTopic} Trends to Watch This Year`,
+      title: `Practical ${firstTopic} Trends to Watch This Year${profileName ? ` for ${profileName}` : ""}`,
       description:
         "A focused look at what is changing quickly and what actually matters in real projects. Includes examples you can apply right away.",
       tags: [toTagSlug(firstTopic), "industry-news", "best-practices"],
@@ -162,6 +186,18 @@ const buildLocalIdeas = (topics) => {
       tone: "insightful",
     },
   ];
+
+  if (!refreshToken) {
+    return baseIdeas;
+  }
+
+  const rotationSeed = Array.from(refreshToken).reduce(
+    (acc, ch) => acc + ch.charCodeAt(0),
+    0
+  );
+  const offset = rotationSeed % baseIdeas.length;
+
+  return [...baseIdeas.slice(offset), ...baseIdeas.slice(0, offset)];
 };
 
 const buildLocalBlogPost = (title, tone) => {
@@ -244,21 +280,48 @@ const generateBlogPost = async (req, res) => {
 // @access  Private
 const generateBlogPostIdeas = async (req, res) => {
   try {
-    const { topics } = req.body;
+    const { topics, refreshToken } = req.body;
 
     if (!topics) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const prompt = blogPostIdeasPrompt(topics);
+    const user = req.user || {};
+    const profileTopics = deriveProfileTopics(user);
+    const finalTopics = [
+      ...new Set(
+        [topics, ...profileTopics]
+          .join(",")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      ),
+    ].join(", ");
+
+    const prompt = blogPostIdeasPrompt(finalTopics, {
+      profileName: user.name,
+      profileBio: user.bio,
+      refreshToken,
+    });
     const rawText = await generateWithFallbackModel(prompt);
     const data = extractJSONArray(rawText);
 
     res.status(200).json(data);
   } catch (error) {
     console.error("AI generateBlogPostIdeas failed, returning local fallback:", error.message);
-    const { topics } = req.body;
-    return res.status(200).json(buildLocalIdeas(topics));
+    const { topics, refreshToken } = req.body;
+    const user = req.user || {};
+    const profileTopics = deriveProfileTopics(user);
+    const finalTopics = [topics, ...profileTopics]
+      .filter(Boolean)
+      .join(", ");
+
+    return res.status(200).json(
+      buildLocalIdeas(finalTopics, {
+        profileName: user.name,
+        refreshToken,
+      })
+    );
   }
 };
 

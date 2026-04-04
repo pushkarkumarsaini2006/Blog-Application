@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import MDEditor, { commands } from "@uiw/react-md-editor";
 import {
+  LuRefreshCcw,
   LuLoaderCircle,
   LuSave,
   LuSend,
@@ -68,6 +69,9 @@ const BlogPostEditor = ({ isEdit }) => {
         API_PATHS.AI.GENERATE_BLOG_POST_IDEAS,
         {
           topics: "React JS, Next JS, Node JS, React UI Components",
+          refreshToken: `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 10)}`,
         }
       );
       const generatedIdeas = aiResponse.data;
@@ -87,9 +91,10 @@ const BlogPostEditor = ({ isEdit }) => {
     let coverImageUrl = "";
     const requiresCoverImage =
       postData.postType === "blog" || postData.postType === "news";
-    const requiresTitleAndTags = postData.postType !== "thought";
+    const requiresTitle = postData.postType !== "thought";
+    const requiresTags = postData.postType === "blog";
 
-    if (requiresTitleAndTags && !postData.title.trim()) {
+    if (requiresTitle && !postData.title.trim()) {
       setError("Please enter a title.");
       return;
     }
@@ -109,7 +114,7 @@ const BlogPostEditor = ({ isEdit }) => {
           return;
         }
       }
-      if (requiresTitleAndTags && !postData.tags.length) {
+      if (requiresTags && !postData.tags.length) {
         setError("Please add some tags.");
         return;
       }
@@ -131,7 +136,7 @@ const BlogPostEditor = ({ isEdit }) => {
         postType: postData.postType,
         content: postData.content,
         coverImageUrl,
-        tags: postData.postType === "thought" ? [] : postData.tags,
+        tags: postData.postType === "blog" ? postData.tags : [],
         isDraft: isDraft ? true : false,
         generatedByAI: true,
       };
@@ -202,12 +207,25 @@ const BlogPostEditor = ({ isEdit }) => {
   useEffect(() => {
     if (isEdit) {
       fetchPostDetailsBySlug();
-    } else {
-      generatePostIdeas();
     }
 
     return () => {};
-  }, []);
+  }, [isEdit]);
+
+  useEffect(() => {
+    if (isEdit) {
+      return;
+    }
+
+    if (postData.postType === "blog") {
+      generatePostIdeas();
+      return;
+    }
+
+    if (postData.postType === "news") {
+      setPostIdeas([]);
+    }
+  }, [isEdit, postData.postType]);
 
   const isThoughtPost = postData.postType === "thought";
 
@@ -334,7 +352,7 @@ const BlogPostEditor = ({ isEdit }) => {
               </div>
             </div>
 
-            {!isThoughtPost && (
+            {postData.postType === "blog" && (
               <div className="mt-3">
                 <label className="text-xs font-medium text-slate-600">Tags</label>
 
@@ -348,7 +366,7 @@ const BlogPostEditor = ({ isEdit }) => {
             )}
           </div>
 
-          {!isEdit && !isThoughtPost && (
+          {!isEdit && postData.postType === "blog" && (
             <div className="form-card col-span-12 md:col-span-4 p-0">
               <div className="flex items-center justify-between px-6 pt-6">
                 <h4 className="text-sm md:text-base font-medium inline-flex items-center gap-2">
@@ -358,14 +376,25 @@ const BlogPostEditor = ({ isEdit }) => {
                   Ideas for your next post
                 </h4>
 
-                <button
-                  className="bg-linear-to-r from-sky-500 to-cyan-400 text-[13px] font-semibold text-white px-3 py-1 rounded hover:bg-black hover:text-white transition-colors cursor-pointer hover:shadow-2xl hover:shadow-sky-200"
-                  onClick={() =>
-                    setOpenBlogPostGenForm({ open: true, data: null })
-                  }
-                >
-                  Generate New
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="inline-flex items-center gap-1.5 border border-sky-200 text-sky-700 text-[12px] font-semibold px-2.5 py-1 rounded hover:bg-sky-50 transition-colors cursor-pointer disabled:opacity-50"
+                    disabled={ideaLoading}
+                    onClick={generatePostIdeas}
+                  >
+                    <LuRefreshCcw className={ideaLoading ? "animate-spin" : ""} />
+                    Refresh
+                  </button>
+
+                  <button
+                    className="bg-linear-to-r from-sky-500 to-cyan-400 text-[13px] font-semibold text-white px-3 py-1 rounded hover:bg-black hover:text-white transition-colors cursor-pointer hover:shadow-2xl hover:shadow-sky-200"
+                    onClick={() =>
+                      setOpenBlogPostGenForm({ open: true, data: null })
+                    }
+                  >
+                    Generate New
+                  </button>
+                </div>
               </div>
 
               <div>
