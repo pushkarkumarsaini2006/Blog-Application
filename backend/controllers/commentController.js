@@ -1,5 +1,6 @@
 const Comment = require("../models/Comment");
 const BlogPost = require("../models/BlogPost");
+const { getContentModerationResult } = require("../utils/contentModeration");
 
 // @desc    Add a comment to a blog post
 // @route   POST /api/comments/:postId
@@ -8,6 +9,14 @@ const addComment = async (req, res) => {
   try {
     const { postId } = req.params;
     const { content, parentComment } = req.body;
+
+    const moderation = getContentModerationResult(content);
+    if (!moderation.allowed) {
+      return res.status(400).json({
+        message: "Comment contains disallowed content.",
+        details: moderation.issues,
+      });
+    }
 
     // Ensure blog post exists
     const post = await BlogPost.findById(postId);
@@ -18,7 +27,7 @@ const addComment = async (req, res) => {
     const comment = await Comment.create({
       post: postId,
       author: req.user._id,
-      content,
+      content: content.trim(),
       parentComment: parentComment || null,
     });
 

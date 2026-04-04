@@ -39,9 +39,9 @@ export const BLOG_NAVBAR_DATA = [
   },
   {
     id: "00",
-    label: "Create Post",
+    label: "Admin Dashboard",
     icon: LuLayoutDashboard,
-    path: "/admin/create",
+    path: "/admin/dashboard",
     adminOnly: true,
   },
   {

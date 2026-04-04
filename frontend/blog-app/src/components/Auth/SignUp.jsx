@@ -16,6 +16,7 @@ const SignUp = ({setCurrentPage}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [adminAccessToken, setAdminAccessToken] = useState("");
+  const [website, setWebsite] = useState("");
 
   const [error, setError] = useState(null);
 
@@ -70,7 +71,8 @@ const SignUp = ({setCurrentPage}) => {
         email: email.trim().toLowerCase(),
         password,
         profileImageUrl,
-        adminAccessToken: adminAccessToken || ""
+        adminAccessToken: adminAccessToken || "",
+        website,
       });
 
       const { token, role } = response.data;
@@ -108,6 +110,17 @@ const SignUp = ({setCurrentPage}) => {
         </p>
 
         <form onSubmit={handleSignUp} noValidate>
+
+          <div className="hidden" aria-hidden="true">
+            <input
+              value={website}
+              onChange={({ target }) => setWebsite(target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              name="website"
+              id="signup-website"
+            />
+          </div>
 
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 

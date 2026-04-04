@@ -60,14 +60,12 @@ const blogSummaryPrompt = (blogContent) => (`
   - Read the blog post content below.
   - Generate a short, catchy, SEO-friendly title (max 12 words).
   - Write a clear, engaging summary of about 300 words.
-  - At the end of the summary, add a markdown section titled **## What You’ll Learn**.
-  - Under that heading, list 3–5 key takeaways or skills the reader will learn in **bullet points** using markdown (\`- \`).
   
   Return the result in **valid JSON** with the following structure:
   
   {
     "title": "Short SEO-friendly title",
-    "summary": "300-word summary with a markdown section for What You'll Learn"
+    "summary": "300-word summary"
   }
   
   Only return valid JSON. Do not include markdown or code blocks around the JSON.

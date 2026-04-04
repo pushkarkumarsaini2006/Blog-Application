@@ -26,6 +26,7 @@ const BlogLandingPage = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const hasMoreThoughtPages = thoughtPage < thoughtTotalPages;
 
   // Fetch paginated posts with improved error handling
   const fetchPosts = async (pageNumber = 1) => {
@@ -122,6 +123,10 @@ const BlogLandingPage = () => {
     }
   };
 
+  const handleShowLessThoughts = () => {
+    setShowMoreThoughts(false);
+  };
+
   const handleClick = (post) => {
     navigate(`/${post.slug}`);
   };
@@ -172,24 +177,35 @@ const BlogLandingPage = () => {
               </div>
             )}
 
-            {thoughtPostList.length > 1 && (
-              <div className="flex items-center justify-center mt-5">
-                <button
-                  className="flex items-center gap-3 text-sm text-white font-medium bg-sky-600 px-7 py-2.5 rounded-full text-nowrap hover:scale-105 transition-all cursor-pointer"
-                  disabled={isThoughtLoading || (showMoreThoughts && thoughtPage >= thoughtTotalPages)}
-                  onClick={handleLoadMoreThoughts}
-                >
-                  {isThoughtLoading ? (
-                    <LuLoaderCircle className="animate-spin text-[15px]" />
-                  ) : (
-                    <LuGalleryVerticalEnd className="text-lg" />
-                  )}
-                  {isThoughtLoading
-                    ? "Loading..."
-                    : showMoreThoughts && thoughtPage < thoughtTotalPages
-                      ? "Show More Thoughts"
-                      : "Show More"}
-                </button>
+            {(thoughtPostList.length > 1 || hasMoreThoughtPages) && (
+              <div className="flex items-center justify-center gap-3 mt-5">
+                {(!showMoreThoughts || hasMoreThoughtPages) && (
+                  <button
+                    className="flex items-center gap-3 text-sm text-white font-medium bg-sky-600 px-7 py-2.5 rounded-full text-nowrap hover:scale-105 transition-all cursor-pointer"
+                    disabled={isThoughtLoading}
+                    onClick={handleLoadMoreThoughts}
+                  >
+                    {isThoughtLoading ? (
+                      <LuLoaderCircle className="animate-spin text-[15px]" />
+                    ) : (
+                      <LuGalleryVerticalEnd className="text-lg" />
+                    )}
+                    {isThoughtLoading
+                      ? "Loading..."
+                      : showMoreThoughts
+                        ? "Show More Thoughts"
+                        : "Show More"}
+                  </button>
+                )}
+
+                {showMoreThoughts && (
+                  <button
+                    className="text-sm font-medium text-slate-700 border border-slate-300 px-6 py-2.5 rounded-full hover:bg-slate-50 transition-all cursor-pointer"
+                    onClick={handleShowLessThoughts}
+                  >
+                    Show Less
+                  </button>
+                )}
               </div>
             )}
           </div>

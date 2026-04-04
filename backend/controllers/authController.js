@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { isLikelyFakeSignup } = require("../utils/contentModeration");
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -13,7 +14,21 @@ const generateToken = (userId) => {
 const registerUser = async (req, res) => {
   try {
     console.log("Registration attempt:", { email: req.body.email, name: req.body.name });
-    const { name, email, password, profileImageUrl, bio, adminAccessToken } = req.body;
+    const { name, email, password, profileImageUrl, bio, adminAccessToken, website = "" } = req.body;
+
+    const signupCheck = isLikelyFakeSignup({
+      name,
+      email,
+      password,
+      honeypot: website,
+    });
+
+    if (!signupCheck.allowed) {
+      return res.status(400).json({
+        message: "Registration rejected.",
+        details: signupCheck.issues,
+      });
+    }
 
     // Validation
     if (!name || !email || !password) {
@@ -36,9 +51,9 @@ const registerUser = async (req, res) => {
     }
 
     // Password length validation
-    if (password.length < 6) {
+    if (password.length < 8) {
       console.log("Password too short");
-      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      return res.status(400).json({ message: "Password must be at least 8 characters long" });
     }
 
     const userExists = await User.findOne({ email });

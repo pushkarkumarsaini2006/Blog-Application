@@ -349,9 +349,14 @@ const buildLocalSummary = (content) => {
   const preview = safeContent.slice(0, 280);
   return {
     title: "Quick Practical Summary",
-    summary: `${preview}${safeContent.length > 280 ? "..." : ""}\n\n## What You'll Learn\n- The main idea and its context\n- Practical steps to apply immediately\n- Key trade-offs to consider before implementation`,
+    summary: `${preview}${safeContent.length > 280 ? "..." : ""}`,
   };
 };
+
+const removeWhatYouWillLearnSection = (summary = "") =>
+  String(summary || "")
+    .replace(/\n?\s*##\s*What\s*You(?:'|’)ll\s*Learn[\s\S]*$/i, "")
+    .trim();
 
 // @desc    Generate blog content from title
 // @route   POST /api/ai/generate
@@ -473,6 +478,7 @@ const generatePostSummary = async (req, res) => {
     const prompt = blogSummaryPrompt(content);
     const rawText = await generateWithFallbackModel(prompt);
     const data = extractJSONObject(rawText);
+    data.summary = removeWhatYouWillLearnSection(data.summary);
     res.status(200).json(data);
   } catch (error) {
     console.error("AI generatePostSummary failed, returning local fallback:", error.message);

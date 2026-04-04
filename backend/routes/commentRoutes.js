@@ -7,8 +7,9 @@ const {
   getAllComments,
 } = require("../controllers/commentController");
 const { protect } = require("../middlewares/authMiddleware");
+const { limitCommentAttempts } = require("../middlewares/rateLimitMiddleware");
 
-router.post("/:postId", protect, addComment);
+router.post("/:postId", protect, limitCommentAttempts, addComment);
 router.get("/:postId", getCommentsByPost);
 router.get("/", getAllComments);
 router.delete("/:commentId", protect, deleteComment);

@@ -4,6 +4,7 @@ const {
   syncPostTypeMirrors,
   deletePostTypeMirrors,
 } = require("../utils/postTypeMirrorSync");
+const { getContentModerationResult } = require("../utils/contentModeration");
 
 const generateSlug = (value = "") =>
   value
@@ -70,6 +71,16 @@ const createPost = async (req, res) => {
       generatedByAI,
     });
 
+    if (!isDraft) {
+      const moderation = getContentModerationResult(`${normalizedTitle} ${content}`);
+      if (!moderation.allowed) {
+        return res.status(400).json({
+          message: "Post contains disallowed content.",
+          details: moderation.issues,
+        });
+      }
+    }
+
     await newPost.save();
 
     try {
@@ -105,6 +116,16 @@ const updatePost = async (req, res) => {
 
     const updatedData = req.body;
     const previousType = post.postType;
+
+    if (!updatedData.isDraft) {
+      const moderation = getContentModerationResult(`${updatedData.title || post.title} ${updatedData.content || post.content}`);
+      if (!moderation.allowed) {
+        return res.status(400).json({
+          message: "Post contains disallowed content.",
+          details: moderation.issues,
+        });
+      }
+    }
     if (updatedData.title) {
       updatedData.slug = updatedData.title
         .toLowerCase()
