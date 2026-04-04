@@ -12,6 +12,7 @@ const BlogPostSummaryCard = ({
   authProfileImg,
   onClick,
   showImage = true,
+  showAuthorInfo = true,
 }) => {
     const navigate = useNavigate()
   return  <div
@@ -48,18 +49,22 @@ const BlogPostSummaryCard = ({
           ))}
         </div>
 
-        <div className="flex items-center">
-          <img
-            src={getFullImageUrl(authProfileImg)}
-            alt={authorName}
-            className="w-8 h-8 rounded-full mr-2"
-          />
+        {showAuthorInfo ? (
+          <div className="flex items-center">
+            <img
+              src={getFullImageUrl(authProfileImg)}
+              alt={authorName}
+              className="w-8 h-8 rounded-full mr-2"
+            />
 
-          <div>
-            <p className="text-gray-600 text-sm">{authorName}</p>
-            <p className="text-gray-500 text-xs">{updatedOn}</p>
+            <div>
+              <p className="text-gray-600 text-sm">{authorName}</p>
+              <p className="text-gray-500 text-xs">{updatedOn}</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p className="text-gray-500 text-xs">{updatedOn}</p>
+        )}
       </div>
     </div>
 };

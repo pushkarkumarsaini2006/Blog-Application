@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LuMessageCircleDashed } from "react-icons/lu";
 import { PiHandsClapping } from "react-icons/pi";
 import axiosInstance from "../../../utils/axiosInstance";
@@ -6,8 +6,12 @@ import { API_PATHS } from "../../../utils/apiPaths";
 import clsx from "clsx";
 
 const LikeCommentButton = ({ postId, likes, comments }) => {
-    const [postLikes, setPostLikes] = useState(likes || 0);
+  const [postLikes, setPostLikes] = useState(likes || 0);
   const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    setPostLikes(likes || 0);
+  }, [postId, likes]);
 
   const handleLikeClick = async () => {
     if (!postId) return;

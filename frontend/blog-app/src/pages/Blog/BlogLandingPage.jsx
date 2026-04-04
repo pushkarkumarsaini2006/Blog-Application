@@ -18,6 +18,9 @@ const BlogLandingPage = () => {
   const navigate = useNavigate();
 
   const [thoughtPostList, setThoughtPostList] = useState([]);
+  const [thoughtPage, setThoughtPage] = useState(1);
+  const [thoughtTotalPages, setThoughtTotalPages] = useState(null);
+  const [isThoughtLoading, setIsThoughtLoading] = useState(false);
   const [blogPostList, setBlogPostList] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
@@ -40,20 +43,19 @@ const BlogLandingPage = () => {
     onRetry: () => getAllPosts(page)
   });
 
-  const fetchRandomThoughtPosts = async () => {
+  const fetchThoughtPosts = async (pageNumber = 1) => {
     const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
       params: {
         status: "published",
         postType: "thought",
-        random: true,
-        limit: 3,
+        page: pageNumber,
       },
     });
 
     return response.data;
   };
 
-  const { execute: getRandomThoughtPosts } = useApiCall(fetchRandomThoughtPosts, {
+  const { execute: getThoughtPosts } = useApiCall(fetchThoughtPosts, {
     customMessage: "Failed to load thoughts.",
     silent: true,
   });
@@ -88,15 +90,29 @@ const BlogLandingPage = () => {
   // Initial load
   useEffect(() => {
     loadPosts(1);
-    getRandomThoughts();
+    loadThoughtPosts(1);
   }, []);
 
-  const getRandomThoughts = async () => {
+  const loadThoughtPosts = async (pageNumber = 1) => {
     try {
-      const { posts } = await getRandomThoughtPosts();
-      setThoughtPostList(posts || []);
+      setIsThoughtLoading(true);
+      const { posts, totalPages } = await getThoughtPosts(pageNumber);
+
+      setThoughtPostList((prevPosts) =>
+        pageNumber === 1 ? posts : [...prevPosts, ...posts]
+      );
+      setThoughtTotalPages(totalPages);
+      setThoughtPage(pageNumber);
     } catch (error) {
       console.error("Error loading thoughts:", error);
+    } finally {
+      setIsThoughtLoading(false);
+    }
+  };
+
+  const handleLoadMoreThoughts = () => {
+    if (thoughtPage < thoughtTotalPages) {
+      loadThoughtPosts(thoughtPage + 1);
     }
   };
 
@@ -113,6 +129,7 @@ const BlogLandingPage = () => {
                 title={thoughtPostList[0].title}
                 coverImageUrl={thoughtPostList[0].coverImageUrl}
                 showImage={false}
+                showAuthorInfo={false}
                 description={thoughtPostList[0].content}
                 tags={thoughtPostList[0].tags}
                 updatedOn={
@@ -134,6 +151,7 @@ const BlogLandingPage = () => {
                     title={item.title}
                     coverImageUrl={item.coverImageUrl}
                     showImage={false}
+                    showAuthorInfo={false}
                     description={item.content}
                     tags={item.tags}
                     updatedOn={
@@ -145,6 +163,23 @@ const BlogLandingPage = () => {
                   />
                 ))}
             </div>
+
+            {thoughtPage < thoughtTotalPages && (
+              <div className="flex items-center justify-center mt-5">
+                <button
+                  className="flex items-center gap-3 text-sm text-white font-medium bg-sky-600 px-7 py-2.5 rounded-full text-nowrap hover:scale-105 transition-all cursor-pointer"
+                  disabled={isThoughtLoading}
+                  onClick={handleLoadMoreThoughts}
+                >
+                  {isThoughtLoading ? (
+                    <LuLoaderCircle className="animate-spin text-[15px]" />
+                  ) : (
+                    <LuGalleryVerticalEnd className="text-lg" />
+                  )}
+                  {isThoughtLoading ? "Loading..." : "See More Thoughts"}
+                </button>
+              </div>
+            )}
           </div>
 
           <h4 className="text-lg text-black font-semibold mt-10 mb-4">Blog</h4>
