@@ -214,7 +214,7 @@ const BlogPostView = () => {
 
                 <SharePost title={blogPostData.title} />
 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div id="comments-section" className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-lg font-semibold">Comments</h4>
 

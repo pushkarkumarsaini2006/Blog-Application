@@ -13,9 +13,11 @@ const FeaturedBlogPost = ({
   showImage = true,
   showAuthorInfo = true,
 }) => {
+  const isClickable = typeof onClick === "function";
+
   return <div
-      className="grid grid-cols-12 bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden cursor-pointer"
-      onClick={onClick}
+      className={`grid grid-cols-12 bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden ${isClickable ? "cursor-pointer" : "cursor-default"}`}
+      onClick={isClickable ? onClick : undefined}
     >
       {showImage && (
         <div className="col-span-6">

@@ -14,10 +14,12 @@ const BlogPostSummaryCard = ({
   showImage = true,
   showAuthorInfo = true,
 }) => {
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+  const isClickable = typeof onClick === "function";
+
   return  <div
-      className="bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden cursor-pointer"
-      onClick={onClick}
+      className={`bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden ${isClickable ? "cursor-pointer" : "cursor-default"}`}
+      onClick={isClickable ? onClick : undefined}
     >
       {showImage && (
         <img

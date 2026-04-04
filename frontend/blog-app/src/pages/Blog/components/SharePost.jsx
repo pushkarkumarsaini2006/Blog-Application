@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { LuCheck, LuCopy } from "react-icons/lu";
+import { FaXTwitter } from "react-icons/fa6";
 import {
   FacebookShareButton,
   TwitterShareButton,
   LinkedinShareButton,
   FacebookIcon,
-  TwitterIcon,
   LinkedinIcon,
 } from "react-share";
 
@@ -32,7 +32,7 @@ const SharePost = ({title}) => {
         </FacebookShareButton>
 
         <TwitterShareButton url={shareUrl} title={title}>
-          <TwitterIcon size={32} round />
+          <FaXTwitter size={32} className="text-black" />
         </TwitterShareButton>
 
         <LinkedinShareButton url={shareUrl} title={title}>

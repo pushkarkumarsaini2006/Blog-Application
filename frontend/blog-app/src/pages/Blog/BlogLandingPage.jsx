@@ -150,7 +150,6 @@ const BlogLandingPage = () => {
                 }
                 authorName={thoughtPostList[0].author?.name || "Anonymous"}
                 authProfileImg={thoughtPostList[0].author?.profileImageUrl || ""}
-                onClick={() => handleClick(thoughtPostList[0])}
               />
             )}
 
@@ -171,7 +170,6 @@ const BlogLandingPage = () => {
                     }
                     authorName={item.author?.name || "Anonymous"}
                     authProfileImg={item.author?.profileImageUrl || ""}
-                    onClick={() => handleClick(item)}
                   />
                 ))}
               </div>
