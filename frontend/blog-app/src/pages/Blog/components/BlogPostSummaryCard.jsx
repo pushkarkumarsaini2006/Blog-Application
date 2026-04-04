@@ -11,17 +11,20 @@ const BlogPostSummaryCard = ({
   authorName,
   authProfileImg,
   onClick,
+  showImage = true,
 }) => {
     const navigate = useNavigate()
   return  <div
       className="bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden cursor-pointer"
       onClick={onClick}
     >
-      <img
-        src={getFullImageUrl(coverImageUrl)}
-        alt={title}
-        className="w-full h-64 object-cover"
-      />
+      {showImage && (
+        <img
+          src={getFullImageUrl(coverImageUrl)}
+          alt={title}
+          className="w-full h-64 object-cover"
+        />
+      )}
 
       <div className="p-4 md:p-6">
         <h2 className="text-base md:text-lg font-bold mb-2 line-clamp-3">

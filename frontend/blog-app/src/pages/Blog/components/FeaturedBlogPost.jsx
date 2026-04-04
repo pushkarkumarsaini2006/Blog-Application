@@ -10,20 +10,23 @@ const FeaturedBlogPost = ({
   authorName,
   authProfileImg,
   onClick,
+  showImage = true,
 }) => {
   return <div
       className="grid grid-cols-12 bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden cursor-pointer"
       onClick={onClick}
     >
-      <div className="col-span-6">
-        <img
-          src={getFullImageUrl(coverImageUrl)}
-          alt={title}
-          className="w-full h-80 object-cover"
-        />
-      </div>
+      {showImage && (
+        <div className="col-span-6">
+          <img
+            src={getFullImageUrl(coverImageUrl)}
+            alt={title}
+            className="w-full h-80 object-cover"
+          />
+        </div>
+      )}
 
-      <div className="col-span-6">
+      <div className={showImage ? "col-span-6" : "col-span-12"}>
         <div className="p-6">
           <h2 className="text-lg md:text-2xl font-bold mb-2 line-clamp-3">
             {title}
