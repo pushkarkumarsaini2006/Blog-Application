@@ -21,6 +21,7 @@ const BlogLandingPage = () => {
   const [thoughtPage, setThoughtPage] = useState(1);
   const [thoughtTotalPages, setThoughtTotalPages] = useState(null);
   const [isThoughtLoading, setIsThoughtLoading] = useState(false);
+  const [showMoreThoughts, setShowMoreThoughts] = useState(false);
   const [blogPostList, setBlogPostList] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
@@ -111,6 +112,11 @@ const BlogLandingPage = () => {
   };
 
   const handleLoadMoreThoughts = () => {
+    if (!showMoreThoughts) {
+      setShowMoreThoughts(true);
+      return;
+    }
+
     if (thoughtPage < thoughtTotalPages) {
       loadThoughtPosts(thoughtPage + 1);
     }
@@ -143,8 +149,9 @@ const BlogLandingPage = () => {
               />
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {thoughtPostList.length > 1 &&
+            {showMoreThoughts && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                {thoughtPostList.length > 1 &&
                 thoughtPostList.slice(1).map((item) => (
                   <BlogPostSummaryCard
                     key={item._id}
@@ -162,13 +169,14 @@ const BlogLandingPage = () => {
                     onClick={() => handleClick(item)}
                   />
                 ))}
-            </div>
+              </div>
+            )}
 
-            {thoughtPage < thoughtTotalPages && (
+            {thoughtPostList.length > 1 && (
               <div className="flex items-center justify-center mt-5">
                 <button
                   className="flex items-center gap-3 text-sm text-white font-medium bg-sky-600 px-7 py-2.5 rounded-full text-nowrap hover:scale-105 transition-all cursor-pointer"
-                  disabled={isThoughtLoading}
+                  disabled={isThoughtLoading || (showMoreThoughts && thoughtPage >= thoughtTotalPages)}
                   onClick={handleLoadMoreThoughts}
                 >
                   {isThoughtLoading ? (
@@ -176,7 +184,11 @@ const BlogLandingPage = () => {
                   ) : (
                     <LuGalleryVerticalEnd className="text-lg" />
                   )}
-                  {isThoughtLoading ? "Loading..." : "See More Thoughts"}
+                  {isThoughtLoading
+                    ? "Loading..."
+                    : showMoreThoughts && thoughtPage < thoughtTotalPages
+                      ? "Show More Thoughts"
+                      : "Show More"}
                 </button>
               </div>
             )}

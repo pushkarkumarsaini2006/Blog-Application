@@ -1,4 +1,25 @@
 const mongoose = require("mongoose");
+const { syncAllPostTypeMirrors } = require("../utils/postTypeMirrorSync");
+
+const ensurePostCollectionName = async () => {
+  const db = mongoose.connection.db;
+  if (!db) {
+    return;
+  }
+
+  const collectionInfos = await db.listCollections({}, { nameOnly: true }).toArray();
+  const collectionNames = collectionInfos.map((item) => item.name);
+
+  const hasLegacyBlogPosts = collectionNames.includes("blogposts");
+  const hasPost = collectionNames.includes("post");
+
+  if (!hasLegacyBlogPosts || hasPost) {
+    return;
+  }
+
+  await db.collection("blogposts").rename("post");
+  console.log("Renamed MongoDB collection 'blogposts' to 'post'");
+};
 
 const connectDB = async () => {
   try {
@@ -24,6 +45,19 @@ const connectDB = async () => {
     mongoose.connection.on('reconnected', () => {
       console.log('MongoDB reconnected');
     });
+
+    try {
+      await ensurePostCollectionName();
+    } catch (renameError) {
+      console.error("Failed to rename blogposts collection:", renameError.message);
+    }
+
+    try {
+      await syncAllPostTypeMirrors();
+      console.log("Thought/News mirror collections synced successfully");
+    } catch (syncError) {
+      console.error("Failed to sync thought/news mirror collections:", syncError.message);
+    }
     
   } catch (err) {
     console.error("Error connecting to MongoDB:", err.message);

@@ -65,12 +65,17 @@ axiosInstance.interceptors.response.use(
     // Handle common errors globally
     if (error.response) {
       if (error.response.status === 401) {
-        // Clear invalid token and redirect to login
-        console.log("401 Unauthorized - clearing token");
-        localStorage.removeItem("token");
-        // Only redirect if not already on home/login page
-        if (window.location.pathname.includes('/admin')) {
-          window.location.href = "/";
+        const requestUrl = String(error.config?.url || "");
+        const isProfileCheck = requestUrl.includes("/api/auth/profile");
+
+        if (isProfileCheck) {
+          console.log("401 on profile check - clearing token");
+          localStorage.removeItem("token");
+          localStorage.removeItem("blogAppUser");
+
+          if (window.location.pathname.includes('/admin')) {
+            window.location.href = "/";
+          }
         }
       } else if (error.response.status === 500) {
         console.error("Server error. Please try again later.");

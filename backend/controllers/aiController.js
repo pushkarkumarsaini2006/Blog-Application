@@ -115,6 +115,70 @@ const toTagSlug = (value) =>
     .replace(/\s+/g, "-")
     .slice(0, 24);
 
+const ALLOWED_DOMAIN_KEYWORDS = [
+  "development",
+  "dsa",
+  "software engineering",
+  "computer science",
+  "it",
+  "programming",
+  "algorithms",
+  "system design",
+  "backend",
+  "frontend",
+  "data structures",
+];
+
+const hashString = (value = "") =>
+  Array.from(String(value)).reduce(
+    (acc, ch) => (acc * 31 + ch.charCodeAt(0)) % 2147483647,
+    7
+  );
+
+const isInAllowedDomain = (idea = {}) => {
+  const text = [idea.title, idea.description, ...(idea.tags || [])]
+    .join(" ")
+    .toLowerCase();
+
+  return ALLOWED_DOMAIN_KEYWORDS.some((keyword) => text.includes(keyword));
+};
+
+const normalizeIdea = (idea = {}) => ({
+  title: String(idea.title || "").trim(),
+  description: String(idea.description || "").trim(),
+  tags: Array.isArray(idea.tags) ? idea.tags.map((tag) => String(tag).trim()).filter(Boolean) : [],
+  tone: String(idea.tone || "technical").trim() || "technical",
+});
+
+const mergeUniqueIdeas = (primaryIdeas = [], fallbackIdeas = [], excludedTitleSet = new Set()) => {
+  const result = [];
+  const seen = new Set(Array.from(excludedTitleSet).map((title) => title.toLowerCase()));
+
+  const pushUnique = (idea) => {
+    const normalized = normalizeIdea(idea);
+    if (!normalized.title || !normalized.description || normalized.tags.length === 0) {
+      return;
+    }
+
+    const titleKey = normalized.title.toLowerCase();
+    if (seen.has(titleKey)) {
+      return;
+    }
+
+    if (!isInAllowedDomain(normalized)) {
+      return;
+    }
+
+    seen.add(titleKey);
+    result.push(normalized);
+  };
+
+  primaryIdeas.forEach(pushUnique);
+  fallbackIdeas.forEach(pushUnique);
+
+  return result.slice(0, 5);
+};
+
 const deriveProfileTopics = (user = {}) => {
   const fromBio = String(user.bio || "")
     .split(/[,.|/]/)
@@ -140,6 +204,9 @@ const buildLocalIdeas = (topics, options = {}) => {
   const topicText = String(topics || "technology").trim();
   const profileName = String(options.profileName || "").trim();
   const refreshToken = String(options.refreshToken || "").trim();
+  const excludeTitles = Array.isArray(options.excludeTitles)
+    ? options.excludeTitles.map((title) => String(title || "").toLowerCase().trim()).filter(Boolean)
+    : [];
 
   const topicTokens = topicText
     .split(",")
@@ -148,56 +215,88 @@ const buildLocalIdeas = (topics, options = {}) => {
 
   const firstTopic = topicTokens[0] || "Modern Web Development";
   const secondTopic = topicTokens[1] || "Developer Productivity";
+  const thirdTopic = topicTokens[2] || "Data Structures and Algorithms";
 
-  const baseIdeas = [
+  const domains = [
+    "Development",
+    "DSA",
+    "Software Engineering",
+    "Computer Science",
+    "IT Sector",
+  ];
+
+  const contentStyles = [
+    "Practical Deep Dive",
+    "Beginner to Advanced Roadmap",
+    "Production Case Study",
+    "Hands-on Implementation Guide",
+    "Career and Industry Analysis",
+    "Myth vs Reality Breakdown",
+    "Architecture Playbook",
+    "Interview Prep Toolkit",
+  ];
+
+  const seed = hashString(`${refreshToken}|${profileName}|${topicText}`);
+
+  const pickFrom = (items, indexOffset = 0) => {
+    const idx = (seed + indexOffset) % items.length;
+    return items[idx];
+  };
+
+  const generatedIdeas = [
     {
-      title: `Practical ${firstTopic} Trends to Watch This Year${profileName ? ` for ${profileName}` : ""}`,
+      title: `${pickFrom(contentStyles, 1)}: ${firstTopic} in ${pickFrom(domains, 2)}`,
       description:
-        "A focused look at what is changing quickly and what actually matters in real projects. Includes examples you can apply right away.",
-      tags: [toTagSlug(firstTopic), "industry-news", "best-practices"],
-      tone: "professional",
-    },
-    {
-      title: `Beginner Guide: Getting Started with ${firstTopic}`,
-      description:
-        "A step-by-step starter roadmap for newcomers, including common mistakes and quick wins for faster learning.",
-      tags: [toTagSlug(firstTopic), "beginner", "guide"],
-      tone: "beginner-friendly",
-    },
-    {
-      title: `${secondTopic}: What Worked for Us in Production`,
-      description:
-        "A practical thought piece with implementation lessons, trade-offs, and outcomes from a real-world setup.",
-      tags: [toTagSlug(secondTopic), "thoughts", "case-study"],
-      tone: "casual",
-    },
-    {
-      title: `Top 7 Tools to Improve ${firstTopic} Workflows`,
-      description:
-        "A curated list of tools and patterns that reduce friction and improve team velocity while maintaining quality.",
-      tags: [toTagSlug(firstTopic), "tools", "productivity"],
+        "Explore real implementation choices, trade-offs, and patterns used by modern engineering teams.",
+      tags: [toTagSlug(firstTopic), "development", "software-engineering"],
       tone: "technical",
     },
     {
-      title: `Future of ${firstTopic}: News, Signals, and Predictions`,
+      title: `${pickFrom(contentStyles, 3)} for ${thirdTopic}`,
       description:
-        "A forward-looking analysis of current market signals and how teams can prepare for upcoming shifts.",
-      tags: [toTagSlug(firstTopic), "news", "future"],
+        "A focused walkthrough of core DSA ideas, complexity analysis, and practical coding strategy.",
+      tags: ["dsa", "algorithms", "computer-science"],
+      tone: "beginner-friendly",
+    },
+    {
+      title: `${secondTopic}: ${pickFrom(contentStyles, 5)} for Scalable Products`,
+      description:
+        "Learn system-level decisions that improve reliability, maintainability, and developer velocity.",
+      tags: [toTagSlug(secondTopic), "system-design", "it-sector"],
+      tone: "professional",
+    },
+    {
+      title: `${pickFrom(domains, 4)} Trends 2026: What Engineers Should Build Next`,
+      description:
+        "Analyze technology shifts and identify high-impact project directions for software teams.",
+      tags: ["it-sector", "development", "future-tech"],
       tone: "insightful",
+    },
+    {
+      title: `${pickFrom(contentStyles, 7)}: Computer Science Fundamentals for Modern Dev`,
+      description:
+        "Connect CS theory with everyday engineering decisions in backend, frontend, and distributed systems.",
+      tags: ["computer-science", "development", "best-practices"],
+      tone: "technical",
+    },
+    {
+      title: `Software Engineering Workflows: ${pickFrom(contentStyles, 0)} with AI Tooling`,
+      description:
+        "A practical view on integrating AI-assisted development while preserving code quality and review rigor.",
+      tags: ["software-engineering", "development", "ai-tools"],
+      tone: "professional",
+    },
+    {
+      title: `DSA in Real Products: ${pickFrom(contentStyles, 6)} for Performance`,
+      description:
+        "Use data structures and algorithmic thinking to reduce latency and optimize production workloads.",
+      tags: ["dsa", "performance", "computer-science"],
+      tone: "technical",
     },
   ];
 
-  if (!refreshToken) {
-    return baseIdeas;
-  }
-
-  const rotationSeed = Array.from(refreshToken).reduce(
-    (acc, ch) => acc + ch.charCodeAt(0),
-    0
-  );
-  const offset = rotationSeed % baseIdeas.length;
-
-  return [...baseIdeas.slice(offset), ...baseIdeas.slice(0, offset)];
+  const excludedSet = new Set(excludeTitles);
+  return mergeUniqueIdeas(generatedIdeas, [], excludedSet);
 };
 
 const buildLocalBlogPost = (title, tone) => {
@@ -280,7 +379,7 @@ const generateBlogPost = async (req, res) => {
 // @access  Private
 const generateBlogPostIdeas = async (req, res) => {
   try {
-    const { topics, refreshToken } = req.body;
+    const { topics, refreshToken, excludeTitles = [] } = req.body;
 
     if (!topics) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -302,14 +401,27 @@ const generateBlogPostIdeas = async (req, res) => {
       profileName: user.name,
       profileBio: user.bio,
       refreshToken,
+      excludeTitles,
     });
     const rawText = await generateWithFallbackModel(prompt);
-    const data = extractJSONArray(rawText);
+    const aiIdeas = extractJSONArray(rawText);
 
-    res.status(200).json(data);
+    const fallbackIdeas = buildLocalIdeas(finalTopics, {
+      profileName: user.name,
+      refreshToken,
+      excludeTitles,
+    });
+
+    const merged = mergeUniqueIdeas(
+      aiIdeas,
+      fallbackIdeas,
+      new Set(excludeTitles.map((title) => String(title).toLowerCase().trim()))
+    );
+
+    res.status(200).json(merged);
   } catch (error) {
     console.error("AI generateBlogPostIdeas failed, returning local fallback:", error.message);
-    const { topics, refreshToken } = req.body;
+    const { topics, refreshToken, excludeTitles = [] } = req.body;
     const user = req.user || {};
     const profileTopics = deriveProfileTopics(user);
     const finalTopics = [topics, ...profileTopics]
@@ -320,6 +432,7 @@ const generateBlogPostIdeas = async (req, res) => {
       buildLocalIdeas(finalTopics, {
         profileName: user.name,
         refreshToken,
+        excludeTitles,
       })
     );
   }

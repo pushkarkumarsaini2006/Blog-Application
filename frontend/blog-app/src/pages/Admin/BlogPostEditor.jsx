@@ -35,7 +35,7 @@ const BlogPostEditor = ({ isEdit }) => {
   const [postData, setPostData] = useState({
     id: "",
     title: "",
-    postType: "thought",
+    postType: "blog",
     content: "",
     coverImageUrl: "",
     coverPreview: "",
@@ -68,7 +68,9 @@ const BlogPostEditor = ({ isEdit }) => {
       const aiResponse = await axiosInstance.post(
         API_PATHS.AI.GENERATE_BLOG_POST_IDEAS,
         {
-          topics: "React JS, Next JS, Node JS, React UI Components",
+          topics:
+            "Development, DSA, Software Engineering, Computer Science, IT Sector",
+          excludeTitles: postIdeas.map((idea) => idea?.title).filter(Boolean),
           refreshToken: `${Date.now()}-${Math.random()
             .toString(36)
             .slice(2, 10)}`,
@@ -284,7 +286,11 @@ const BlogPostEditor = ({ isEdit }) => {
                 </label>
 
                 <input
-                  placeholder="How to Build a MERN App"
+                  placeholder={
+                    postData.postType === "news"
+                      ? "Enter news headline"
+                      : "How to Build a MERN App"
+                  }
                   className="form-input"
                   value={postData.title}
                   onChange={({ target }) =>

@@ -1,5 +1,9 @@
 const BlogPost = require("../models/BlogPost");
 const mongoose = require("mongoose");
+const {
+  syncPostTypeMirrors,
+  deletePostTypeMirrors,
+} = require("../utils/postTypeMirrorSync");
 
 const generateSlug = (value = "") =>
   value
@@ -67,6 +71,13 @@ const createPost = async (req, res) => {
     });
 
     await newPost.save();
+
+    try {
+      await syncPostTypeMirrors(newPost);
+    } catch (syncError) {
+      console.error("Mirror sync failed after create:", syncError.message);
+    }
+
     res.status(201).json(newPost);
   } catch (err) {
     res
@@ -93,6 +104,7 @@ const updatePost = async (req, res) => {
     }
 
     const updatedData = req.body;
+    const previousType = post.postType;
     if (updatedData.title) {
       updatedData.slug = updatedData.title
         .toLowerCase()
@@ -105,6 +117,13 @@ const updatePost = async (req, res) => {
       updatedData,
       { new: true }
     );
+
+    try {
+      await syncPostTypeMirrors(updatedPost, previousType);
+    } catch (syncError) {
+      console.error("Mirror sync failed after update:", syncError.message);
+    }
+
     res.json(updatedPost);
   } catch (err) {
     res
@@ -121,7 +140,16 @@ const deletePost = async (req, res) => {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
+    const sourcePostId = post._id;
+
     await post.deleteOne();
+
+    try {
+      await deletePostTypeMirrors(sourcePostId);
+    } catch (syncError) {
+      console.error("Mirror cleanup failed after delete:", syncError.message);
+    }
+
     res.json({ message: "Post deleted" });
   } catch (err) {
     res

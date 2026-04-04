@@ -2,6 +2,9 @@ const blogPostIdeasPrompt = (topic, options = {}) => {
   const profileName = String(options.profileName || "").trim();
   const profileBio = String(options.profileBio || "").trim();
   const refreshToken = String(options.refreshToken || "").trim();
+  const excludeTitles = Array.isArray(options.excludeTitles)
+    ? options.excludeTitles.filter(Boolean)
+    : [];
 
   return `
     Generate a list of 5 blog post ideas related to ${topic}.
@@ -13,6 +16,12 @@ Profile context:
 
 Use the profile context to personalize suggestions. If bio/interests are available, align ideas to that focus.
 Ensure the 5 ideas are distinct and avoid repeating previous patterns.
+
+Hard domain restriction:
+- Suggestions must be only from: Development, DSA, Software Engineering, Computer Science, and IT sector.
+- Do not generate ideas from non-tech domains.
+
+${excludeTitles.length > 0 ? `Do not repeat these previously suggested titles:\n- ${excludeTitles.join("\n- ")}` : ""}
 
 For each blog post idea, return:
 - a title
