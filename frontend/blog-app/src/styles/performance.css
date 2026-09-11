@@ -1,0 +1,155 @@
+/* Performance-optimized animations that avoid layout recalculation */
+
+/* Override react-hot-toast problematic animations */
+[data-sonner-toaster] [data-sonner-toast] {
+  animation: toast-enter 0.2s ease-out !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-removed="true"] {
+  animation: toast-exit 0.2s ease-in !important;
+}
+
+/* React Hot Toast optimization - override default animations */
+.react-hot-toast > div {
+  animation: optimized-toast-enter 0.3s ease-out !important;
+}
+
+.react-hot-toast > div[data-visible="false"] {
+  animation: optimized-toast-exit 0.2s ease-in !important;
+}
+
+/* Optimized toast animations using transform instead of height/width */
+@keyframes optimized-toast-enter {
+  0% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes optimized-toast-exit {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes toast-enter {
+  0% {
+    transform: translateY(-100%) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-exit {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%) scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Use transform instead of changing layout properties */
+.modal-enter {
+  transform: scale(0.95) translate(-50%, -50%);
+  opacity: 0;
+}
+
+.modal-enter-active {
+  transform: scale(1) translate(-50%, -50%);
+  opacity: 1;
+  transition: all 0.2s ease-out;
+}
+
+.drawer-enter {
+  transform: translateX(100%);
+}
+
+.drawer-enter-active {
+  transform: translateX(0);
+  transition: transform 0.3s ease-out;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize re-renders by using will-change sparingly */
+.optimize-animations {
+  will-change: transform, opacity;
+}
+
+.optimize-animations:hover {
+  will-change: auto;
+}
+
+/* GPU-accelerated transforms */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Loading skeleton animations with reduced reflow */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+  background-size: 200px 100%;
+}
+
+/* Contain layout changes */
+.contain-layout {
+  contain: layout style paint;
+}
+
+/* High contrast mode improvements */
+@media (forced-colors: active) {
+  .btn-primary,
+  .btn-small,
+  button {
+    forced-color-adjust: none;
+    border: 1px solid ButtonText;
+  }
+  
+  button:focus,
+  button:hover {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+  
+  /* Ensure proper contrast for focus indicators */
+  *:focus {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
